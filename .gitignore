@@ -1,0 +1,23 @@
+# Go
+*.exe
+*.exe~
+*.test
+*.out
+*.o
+*.a
+*.so
+*~
+# Compiled Object files
+*.S
+*.rdb
+
+# Log files
+*.log
+
+# Dependency directories
+vendor/
+Godeps/
+
+# IDE and editor files
+.vscode/
+.idea/

@@ -31,7 +31,6 @@
 ### Logging
 - [ ] Logger setup for the project.
 - [ ] Implement file-based persistent logging.
-- [ ] Rotation and cleanup strategy for log files.
 
 ## 3. Additional Considerations
 ### Security
@@ -40,18 +39,12 @@
 - [ ] Implement measures against common security threats like DDoS, data injections, etc.
 
 ### Scalability
-- [ ] Consideration for horizontal scaling.
-- [ ] Integration with distributed queue systems (like Kafka or RabbitMQ).
 - [ ] Strategy for handling high concurrency using goroutines and worker pools.
-
-### Monitoring and Alerting
-- [ ] Integrate monitoring tools.
-- [ ] Set up alert mechanisms for any system failures or issues.
 
 ## Documentation and Community Building
 - [ ] Comprehensive documentation for setup, features, and usage.
 - [ ] Contribution guidelines for the community.
-- [ ] Setup discussion boards or channels (like Gitter or Discord) for community engagement.
+- [ ] Discord community
 
 ## Testing and Release
 - [ ] Comprehensive test coverage for all features.

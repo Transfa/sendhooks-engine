@@ -4,12 +4,12 @@
 
 ## 1. Core Functionality
 ### Data Integration
-- [ ] Integration with Redis for data input.
-- [ ] Set up a Redis channel for ingesting the data.
+- [X] Integration with Redis for data input.
+- [X] Set up a Redis channel for ingesting the data.
 
 ### Sending Data
-- [ ] HTTP client setup to send data to the endpoint.
-- [ ] Header configuration for the HTTP client.
+- [X] HTTP client setup to send data to the endpoint.
+- [X] Header configuration for the HTTP client.
 
 ### Header Signing
 - [ ] Algorithm selection for header signing (e.g., HMAC, RSA).
@@ -17,16 +17,16 @@
   
 ## 2. Features and Enhancements
 ### Exponential Backoff
-- [ ] Implement an exponential backoff mechanism.
+- [X] Implement an exponential backoff mechanism.
 - [ ] Tests to validate exponential backoff behavior.
 
 ### Queuing
-- [ ] Implement or integrate a queuing mechanism.
+- [X] Implement or integrate a queuing mechanism.
 - [ ] Ensure data integrity and no data loss during processing.
 
 ### Retry Mechanism
-- [ ] Implement a retry mechanism upon failure.
-- [ ] Define max retry count and intervals.
+- [X] Implement a retry mechanism upon failure.
+- [X] Define max retry count and intervals.
 
 ### Logging
 - [ ] Logger setup for the project.

@@ -50,3 +50,4 @@
 - [ ] Comprehensive test coverage for all features.
 - [ ] Continuous Integration (CI) setup.
 - [ ] First major release with all the initial features.
+ - [ ] Distribution in Dockerhub 

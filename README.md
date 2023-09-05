@@ -2,7 +2,7 @@
 
 ## Roadmap
 
-## 2. Core Functionality
+## 1. Core Functionality
 ### Data Integration
 - [ ] Integration with Redis for data input.
 - [ ] Set up a Redis channel for ingesting the data.
@@ -15,7 +15,7 @@
 - [ ] Algorithm selection for header signing (e.g., HMAC, RSA).
 - [ ] Implementation of the signing process using a secret key.
   
-## 3. Features and Enhancements
+## 2. Features and Enhancements
 ### Exponential Backoff
 - [ ] Implement an exponential backoff mechanism.
 - [ ] Tests to validate exponential backoff behavior.
@@ -33,7 +33,7 @@
 - [ ] Implement file-based persistent logging.
 - [ ] Rotation and cleanup strategy for log files.
 
-## 4. Additional Considerations
+## 3. Additional Considerations
 ### Security
 - [ ] Implementation of password security or other authentication methods for Redis.
 - [ ] Encryption and secure data handling standards.

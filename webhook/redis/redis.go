@@ -11,14 +11,9 @@ import (
 // WebhookPayload defines the structure of the data expected
 // to be received from Redis, including URL, Webhook ID, and relevant data.
 type WebhookPayload struct {
-	Url       string `json:"url"`
-	WebhookId string `json:"webhookId"`
-	Data      struct {
-		Id      string `json:"id"`
-		Payment string `json:"payment"`
-		Event   string `json:"event"`
-		Date    string `json:"created"`
-	} `json:"data"`
+	Url       string                 `json:"url"`
+	WebhookId string                 `json:"webhookId"`
+	Data      map[string]interface{} `json:"data"`
 }
 
 // Subscribe subscribes to the "webhooks" channel in Redis, listens for messages,

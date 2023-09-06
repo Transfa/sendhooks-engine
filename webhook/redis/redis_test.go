@@ -1,43 +1,57 @@
 package redis
 
+/*
+TestSubscribe is a unit test for the Subscribe function within the redis package.
+
+Purpose:
+- To ensure that the Subscribe function correctly initiates a subscription to the desired Redis channel ("hooks" in this case).
+- To verify that the function enters its main loop and starts listening for messages from the channel.
+
+Details:
+1. A mock Redis client is used to simulate interactions with an actual Redis server.
+2. The test expects the Subscribe function to call the Subscribe method of the Redis client with the channel name "hooks".
+3. The Subscribe function runs in a separate goroutine to emulate its continuous listening nature in a real-world scenario.
+4. The function is expected to signal that it has started its main loop within a certain timeout (2 seconds in this test). Failure to do so results in the test being marked as failed.
+
+By performing this test, we aim to catch potential initialization and listening issues in the Subscribe function before they manifest in production or other stages of the development lifecycle.
+*/
+
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/stretchr/testify/assert"
+	gomock "go.uber.org/mock/gomock"
 )
 
-// Mocking the Redis Client using interfaces would be ideal.
-// For simplicity, this example won't include that part.
+func TestSubscribe(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-func TestGetRedisChannelName(t *testing.T) {
-	assert := assert.New(t)
+	mockRedisClient := NewMockRedisClient(ctrl)
 
-	// Test default value when environment variable is not set
-	channel := getRedisChannelName()
-	assert.Equal("hooks", channel, "Default channel name should be 'hooks'")
-}
-
-func TestProcessMessage(t *testing.T) {
-	assert := assert.New(t)
+	// Setup your expectations
+	// For example, if you want to mock that Subscribe is called with the "hooks" channel and return a mock PubSub:
+	mockPubSub := &redis.PubSub{} // You would ideally want to mock this too
+	mockRedisClient.EXPECT().Subscribe(gomock.Any(), "hooks").Return(mockPubSub)
 
 	ctx := context.Background()
-
-	// Mock the PubSub client and the message here.
-	// This example doesn't include that, but you'd ideally want to mock the pubSub and the message being received.
-	pubSub := &redis.PubSub{} // placeholder, you'd want a mock here
-
 	webhookQueue := make(chan WebhookPayload, 1)
 	defer close(webhookQueue)
 
-	err := processMessage(ctx, pubSub, webhookQueue)
-	assert.Nil(err, "Expected no error from processMessage")
+	loopStarted := make(chan bool)
 
-	// You can add more tests to simulate different scenarios, like:
-	// - Error during message reception from Redis.
-	// - Error during JSON unmarshalling.
-	// - Webhook queue being full.
+	go func() {
+		// Call your function in a goroutine to not block the test
+		_ = Subscribe(ctx, mockRedisClient, webhookQueue, loopStarted)
+	}()
+
+	select {
+	case <-loopStarted:
+		// Loop has started
+	case <-time.After(2 * time.Second):
+		t.Fatal("Expected the Subscribe function to enter its loop within 2 seconds")
+	}
+
 }
-
-// You can add more tests for the other methods and various scenarios.

@@ -40,13 +40,18 @@ type WebhookPayload struct {
 
 // Subscribe initializes a subscription to a Redis channel and continuously listens for messages.
 // It decodes these messages into WebhookPayload and sends them to a provided channel.
-func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload) error {
+func Subscribe(ctx context.Context, client RedisClient, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
 	channelName := getRedisChannelName()
 
 	pubSub := client.Subscribe(ctx, channelName)
 	defer closePubSub(pubSub)
 
 	for {
+		if len(startedChan) > 0 {
+			startedChan[0] <- true
+			// Clear the channel slice so we don't send more signals. Needed and used for tests.
+			startedChan = nil
+		}
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

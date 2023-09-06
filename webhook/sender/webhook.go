@@ -9,14 +9,6 @@ import (
 	"net/http"
 )
 
-// Payload represents the structure of the data expected to be sent as a webhook
-type Payload struct {
-	Event   string
-	Date    string
-	Id      string
-	Payment string
-}
-
 // SendWebhook sends a JSON POST request to the specified URL and updates the event status in the database
 func SendWebhook(data interface{}, url string, webhookId string) error {
 	// Marshal the data into JSON

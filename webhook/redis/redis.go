@@ -33,9 +33,10 @@ type RedisClient interface {
 // the webhook URL, its ID, and the relevant data to be sent. There is no strict type on the data
 // as it the structure can definitely vary.
 type WebhookPayload struct {
-	Url       string                 `json:"url"`
-	WebhookId string                 `json:"webhookId"`
-	Data      map[string]interface{} `json:"data"`
+	Url        string                 `json:"url"`
+	WebhookId  string                 `json:"webhookId"`
+	Data       map[string]interface{} `json:"data"`
+	SecretHash string                 `json:"secretHash"`
 }
 
 // Subscribe initializes a subscription to a Redis channel and continuously listens for messages.

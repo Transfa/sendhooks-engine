@@ -18,7 +18,7 @@ func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookP
 			maxRetries := 5
 
 			for {
-				err := sender.SendWebhook(p.Data, p.Url, p.WebhookId)
+				err := sender.SendWebhook(p.Data, p.Url, p.WebhookId, p.SecretHash)
 				if err == nil {
 					break
 				}

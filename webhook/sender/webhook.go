@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 // SendWebhook sends a JSON POST request to the specified URL and updates the event status in the database
@@ -23,6 +24,11 @@ func SendWebhook(data interface{}, url string, webhookId string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	signature := os.Getenv("WEBHOOK_SIGNATURE")
+
+	if signature != "" {
+		req.Header.Set("X-Secret-Hash", signature)
+	}
 
 	// Send the webhook request
 	client := &http.Client{}

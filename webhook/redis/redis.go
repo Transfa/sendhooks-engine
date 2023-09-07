@@ -18,8 +18,9 @@ and handles message processing.
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
+	"webhook/logging"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -78,7 +79,7 @@ func getRedisChannelName() string {
 // in a centralized manner.
 func closePubSub(pubSub *redis.PubSub) {
 	if err := pubSub.Close(); err != nil {
-		log.Println("Error closing PubSub:", err)
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("Error closing PubSub: %w", err))
 	}
 }
 
@@ -92,7 +93,8 @@ func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan
 
 	var payload WebhookPayload
 	if err = json.Unmarshal([]byte(msg.Payload), &payload); err != nil {
-		log.Println("Error unmarshalling payload:", err)
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error unmarshalling payload: %s", err))
+
 		return nil
 	}
 
@@ -103,7 +105,8 @@ func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		log.Println("Dropped webhook due to channel overflow. Webhook ID:", payload.WebhookId)
+		logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped webhook due to channel overflow. Webhook ID: %s", payload.WebhookId))
+
 	}
 
 	return nil

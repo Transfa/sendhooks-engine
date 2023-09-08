@@ -67,13 +67,3 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 	return nil
 }
 
-func calculateBackoff(currentBackoff time.Duration) time.Duration {
-
-	nextBackoff := currentBackoff * 2
-
-	if nextBackoff > maxBackoff {
-		return maxBackoff
-	}
-
-	return nextBackoff
-}

@@ -23,7 +23,7 @@ func marshalJSON(data interface{}) ([]byte, error) {
 func prepareRequest(url string, jsonBytes []byte, secretHash string) (*http.Request, error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
 	if err != nil {
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("error during the webhook request preparation"))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error during the webhook request preparation"))
 		return nil, err
 	}
 
@@ -46,14 +46,14 @@ func sendRequest(req *http.Request) (*http.Response, error) {
 
 func closeResponse(body io.ReadCloser) {
 	if err := body.Close(); err != nil {
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("error closing response body: %s", err))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error closing response body: %s", err))
 	}
 }
 
 func processResponse(resp *http.Response) (string, []byte, error) {
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("error reading response body: %s", err))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error reading response body: %s", err))
 		return "failed", nil, err
 	}
 

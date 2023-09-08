@@ -66,4 +66,3 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 
 	return nil
 }
-

@@ -15,4 +15,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Refactor Subscribe function in the redis package for better error handling and modularity( #4 )
 - Improve Payload Flexibility to Accept Various JSON Formats( #1 )
 - Fix calculateBackoff redaclarring function (#16 )
-- Handle SendWebooks error and refact Sender package for more reusability ( [#5](https://github.com/koladev32/sendhooks-engine/issues/5) )
+- Refactor SendWebhook function in the sender package for enhanced modularity, error handling, and logging ( #5 )

@@ -16,8 +16,8 @@
 
 ### Header Signing
 
-- [ ] Algorithm selection for header signing (e.g., HMAC, RSA).
-- [ ] Implementation of the signing process using a secret key.
+- [X] Algorithm selection for header signing (e.g., HMAC, RSA).
+- [X] Implementation of the signing process using a secret key.
   
 ## 2. Features and Enhancements
 

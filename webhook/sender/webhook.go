@@ -11,6 +11,8 @@ import (
 	"webhook/logging"
 )
 
+var HTTPClient = &http.Client{}
+
 // SendWebhook sends a JSON POST request to the specified URL and updates the event status in the database
 func SendWebhook(data interface{}, url string, webhookId string, secretHash string) error {
 	// Marshal the data into JSON
@@ -31,8 +33,7 @@ func SendWebhook(data interface{}, url string, webhookId string, secretHash stri
 	}
 
 	// Send the webhook request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}

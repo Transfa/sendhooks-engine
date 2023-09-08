@@ -38,8 +38,8 @@
 
 ### Logging
 
-- [ ] Logger setup for the project.
-- [ ] Implement file-based persistent logging.
+- [X] Logger setup for the project.
+- [X] Implement file-based persistent logging.
 
 ## 3. Additional Considerations
 

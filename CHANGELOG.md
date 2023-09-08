@@ -14,4 +14,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Implement File Logging Module for Enhanced Error Handling (#7)
 - Refactor Subscribe function in the redis package for better error handling and modularity( #4 )
 - Improve Payload Flexibility to Accept Various JSON Formats( #1 )
-- Fix calculateBackoff redaclarring function
+- Fix calculateBackoff redaclarring function (#16 )

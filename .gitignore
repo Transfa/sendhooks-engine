@@ -21,3 +21,6 @@ Godeps/
 # IDE and editor files
 .vscode/
 .idea/
+
+#  binary files
+webhook/webhook

@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 
+	"webhook/logging"
 	redisClient "webhook/redis"
 
 	"webhook/queue"
@@ -33,7 +34,7 @@ func main() {
 	err := redisClient.Subscribe(ctx, client, webhookQueue)
 
 	if err != nil {
-		log.Println("Error:", err)
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))
 	}
 
 	select {}

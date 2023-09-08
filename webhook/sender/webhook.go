@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"webhook/logging"
 )
 
 // SendWebhook sends a JSON POST request to the specified URL and updates the event status in the database
-func SendWebhook(data interface{}, url string, webhookId string) error {
+func SendWebhook(data interface{}, url string, webhookId string, secretHash string) error {
 	// Marshal the data into JSON
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
@@ -24,6 +26,10 @@ func SendWebhook(data interface{}, url string, webhookId string) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
+	if secretHash != "" {
+		req.Header.Set("X-Secret-Hash", secretHash)
+	}
+
 	// Send the webhook request
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -32,7 +38,7 @@ func SendWebhook(data interface{}, url string, webhookId string) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.Println("Error closing response body:", err)
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("error closing response body: %s", err))
 		}
 	}(resp.Body)
 

@@ -16,8 +16,8 @@
 
 ### Header Signing
 
-- [ ] Algorithm selection for header signing (e.g., HMAC, RSA).
-- [ ] Implementation of the signing process using a secret key.
+- [X] Algorithm selection for header signing (e.g., HMAC, RSA).
+- [X] Implementation of the signing process using a secret key.
   
 ## 2. Features and Enhancements
 
@@ -38,8 +38,8 @@
 
 ### Logging
 
-- [ ] Logger setup for the project.
-- [ ] Implement file-based persistent logging.
+- [X] Logger setup for the project.
+- [X] Implement file-based persistent logging.
 
 ## 3. Additional Considerations
 

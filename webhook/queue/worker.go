@@ -2,11 +2,21 @@ package queue
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 	"webhook/sender"
 
 	redisClient "webhook/redis"
+)
+
+const (
+	maxRetries int = 5
+)
+
+const (
+	initialBackoff time.Duration = time.Second
+	maxBackoff     time.Duration = time.Hour
 )
 
 func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookPayload) {
@@ -16,33 +26,31 @@ func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookP
 }
 
 func sendWebhookWithRetries(payload redisClient.WebhookPayload) {
-	if err := retryWithExponentialBackoff(payload, 5, 1*time.Second, time.Hour); err != nil {
+	if err := retryWithExponentialBackoff(payload); err != nil {
 		log.Println("Failed to send webhook after maximum retries. WebhookID:", payload.WebhookId)
 	}
 }
 
-func retryWithExponentialBackoff(payload redisClient.WebhookPayload, maxRetries int, initialBackoff, maxBackoff time.Duration) error {
+func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 	retries := 0
 	backoffTime := initialBackoff
 
 	for retries < maxRetries {
 		err := sender.SendWebhook(payload.Data, payload.Url, payload.WebhookId)
-		if err == nil {
-			return nil
-		}
 
-		log.Println("Error sending webhook:", err)
+		fmt.Errorf("Error sending webhook:", err)
 
-		backoffTime = calculateBackoff(backoffTime, maxBackoff)
+		backoffTime = calculateBackoff(backoffTime)
 		retries++
 
 		time.Sleep(backoffTime)
 	}
 
-	return log.Println("Maximum retries reached")
+	fmt.Errorf("Maximum retries reached:", maxRetries)
+
 }
 
-func calculateBackoff(currentBackoff, maxBackoff time.Duration) time.Duration {
+func calculateBackoff(currentBackoff time.Duration) time.Duration {
 
 	nextBackoff := currentBackoff * 2
 

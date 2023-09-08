@@ -29,6 +29,7 @@ func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookP
 				retries++
 				if retries >= maxRetries {
 					logging.WebhookLogger(logging.WarningType, fmt.Errorf("max retries reached. Giving up on webhook: %s", p.WebhookId))
+					break
 				}
 
 				time.Sleep(backoffTime)

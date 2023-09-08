@@ -36,6 +36,17 @@ func sendWebhookWithRetries(payload redisClient.WebhookPayload) {
 	}
 }
 
+func calculateBackoff(currentBackoff time.Duration) time.Duration {
+
+	nextBackoff := currentBackoff * 2
+
+	if nextBackoff > maxBackoff {
+		return maxBackoff
+	}
+
+	return nextBackoff
+}
+
 func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 	retries := 0
 	backoffTime := initialBackoff

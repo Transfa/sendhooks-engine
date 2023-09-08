@@ -2,8 +2,10 @@ package queue
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
+	"webhook/logging"
 	"webhook/sender"
 
 	redisClient "webhook/redis"
@@ -22,11 +24,11 @@ func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookP
 				if err == nil {
 					break
 				}
-				log.Println("Error sending webhook:", err)
+				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error sending webhook: %s", err))
 
 				retries++
 				if retries >= maxRetries {
-					log.Println("Max retries reached. Giving up on webhook:", p.WebhookId)
+					logging.WebhookLogger(logging.WarningType, fmt.Errorf("max retries reached. Giving up on webhook: %s", p.WebhookId))
 					break
 				}
 

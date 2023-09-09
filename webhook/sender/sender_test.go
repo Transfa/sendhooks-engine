@@ -1,5 +1,11 @@
 package sender
 
+/*
+This package contains mostly test functions for the utils used to send webhooks. If these utils works,
+we can ensure that the send webhook function will function normally too. For a whole test suite for the sender function,
+check out the webhook_test.go file.
+*/
+
 import (
 	"bytes"
 	"io"

@@ -45,13 +45,11 @@
 
 ### Security
 
-- [ ] Implementation of password security or other authentication methods for Redis.
-- [ ] Encryption and secure data handling standards.
-- [ ] Implement measures against common security threats like DDoS, data injections, etc.
+- [X] Implementation of password security or other authentication methods for Redis.
 
 ### Scalability
 
-- [ ] Strategy for handling high concurrency using goroutines and worker pools.
+- [X] Strategy for handling high concurrency using goroutines and worker pools.
 
 ## Documentation and Community Building
 

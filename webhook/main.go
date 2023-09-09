@@ -18,13 +18,21 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Initialize the Redis client
-	client := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_ADDRESS"), // Use an environment variable to set the address
-		Password: "",                         // No password
-		DB:       0,                          // Default DB
-	})
+	redisAddress := os.Getenv("REDIS_ADDRESS")
+	if redisAddress == "" {
+		redisAddress = "localhost:6379" // Default address
+	}
 
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+	if redisPassword == "" {
+		redisPassword = "" // Default password (empty in this case)
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     redisAddress,
+		Password: redisPassword,
+		DB:       0, // Default DB
+	})
 	// Create a channel to act as the queue
 	webhookQueue := make(chan redisClient.WebhookPayload, 100) // Buffer size 100
 

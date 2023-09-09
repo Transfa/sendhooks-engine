@@ -50,6 +50,7 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 
 	for {
 		if len(startedChan) > 0 {
+
 			startedChan[0] <- true
 			// Clear the channel slice so we don't send more signals. Needed and used for tests.
 			startedChan = nil
@@ -58,6 +59,7 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
+
 			if err := processMessage(ctx, pubSub, webhookQueue); err != nil {
 				return err
 			}
@@ -87,13 +89,16 @@ func closePubSub(pubSub *redis.PubSub) {
 // processMessage retrieves, decodes, and dispatches a single message from the Redis channel.
 // Separating message processing into its own function to enhance testability and maintainability.
 func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan<- WebhookPayload) error {
+
 	msg, err := pubSub.ReceiveMessage(ctx)
+
 	if err != nil {
 		return err
 	}
 
 	var payload WebhookPayload
 	if err = json.Unmarshal([]byte(msg.Payload), &payload); err != nil {
+
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error unmarshalling payload: %s", err))
 
 		return nil
@@ -103,6 +108,7 @@ func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan
 	// don't get stuck. Instead, we log the overflow and continue the execution.
 	select {
 	case webhookQueue <- payload:
+
 	case <-ctx.Done():
 		return ctx.Err()
 	default:

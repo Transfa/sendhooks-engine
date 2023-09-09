@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  webhook-sender:
+    build: ../webhook
+    environment:
+      REDIS_ADDRESS: redis:6379
+    depends_on:
+      - redis
+
+  flask-api:
+    build: ./api/
+    ports:
+      - "5001:5001"
+    depends_on:
+      - webhook-sender
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"

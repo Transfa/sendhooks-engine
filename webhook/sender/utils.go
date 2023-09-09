@@ -9,7 +9,11 @@ import (
 	"webhook/logging"
 )
 
-var HTTPClient = &http.Client{}
+type HTTPDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+var HTTPClient HTTPDoer = &http.Client{}
 
 func marshalJSON(data interface{}) ([]byte, error) {
 	jsonBytes, err := json.Marshal(data)

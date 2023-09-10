@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## [0.0.1] - 2023-09-10
+
 ### Added
 
 - Dockerize Project for Distribution on DockerHub (#8)

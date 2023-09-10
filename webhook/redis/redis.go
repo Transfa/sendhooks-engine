@@ -82,7 +82,7 @@ func getRedisChannelName() string {
 // in a centralized manner.
 func closePubSub(pubSub *redis.PubSub) {
 	if err := pubSub.Close(); err != nil {
-		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("Error closing PubSub: %w", err))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error closing PubSub: %w", err))
 	}
 }
 

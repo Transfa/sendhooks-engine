@@ -24,12 +24,11 @@
 ### Exponential Backoff
 
 - [X] Implement an exponential backoff mechanism.
-- [ ] Tests to validate exponential backoff behavior.
+- [X] Tests to validate exponential backoff behavior.
 
 ### Queuing
 
 - [X] Implement or integrate a queuing mechanism.
-- [ ] Ensure data integrity and no data loss during processing.
 
 ### Retry Mechanism
 
@@ -59,7 +58,7 @@
 
 ## Testing and Release
 
-- [ ] Comprehensive test coverage for all features.
-- [ ] Continuous Integration (CI) setup.
-- [ ] First major release with all the initial features.
-- [ ] Distribution in Dockerhub
+- [X] Comprehensive test coverage for all features.
+- [X] Continuous Integration (CI) setup.
+- [X] First major release with all the initial features.
+- [X] Distribution in Dockerhub

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Dockerize Project for Distribution on DockerHub (#8)
+- Add tests suite for the Webhook sender package (#19)
 - Refactor ProcessWebhooks for clarity, safety, and testability (#3 )
 - Implement Payload Signing with webhook-signature Header in SendWebhook (#6)
 - Implement File Logging Module for Enhanced Error Handling (#7)

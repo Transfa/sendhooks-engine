@@ -25,7 +25,7 @@ func currentDateTime() string {
 	return time.Now().Format("2006-01-02 15:04:05")
 }
 
-func WebhookLogger(errorType string, errorMessage error) error {
+var WebhookLogger = func(errorType string, errorMessage error) error {
 	logFileDate := currentDate()
 	logFileName := fmt.Sprintf("%s.log", logFileDate)
 

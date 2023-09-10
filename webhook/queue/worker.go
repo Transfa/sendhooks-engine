@@ -62,7 +62,7 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 		time.Sleep(backoffTime)
 	}
 
-	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %s", maxRetries))
+	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %d", maxRetries))
 
 	return nil
 }

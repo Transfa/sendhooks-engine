@@ -9,8 +9,6 @@ r = redis.Redis(host='redis', port=6379, db=0)
 @app.route('/api/send', methods=['POST'])
 def send_data():
     payload = request.json
-    print(payload)
-
     r.publish('hooks', json.dumps(payload))
     return jsonify({"status": "sent to channel"})
 
@@ -18,7 +16,6 @@ def send_data():
 def webhook_endpoint():
     data = request.json
     # Process the webhook data as needed
-    print(data)
     return jsonify(data)
 
 if __name__ == '__main__':

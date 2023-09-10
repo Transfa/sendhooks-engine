@@ -1,12 +1,11 @@
 version: '3.9'
 
 services:
-
   redis:
     image: redis:latest
     hostname: redis
     ports:
-      - "6379:6379"
+      - "6379:6379" # this makes the service available on the localhost via 6379.
 
   webhook-sender:
     build: ../webhook
@@ -18,6 +17,6 @@ services:
   flask-api:
     build: ./api/
     ports:
-      - "5001:5000"
+      - "5001:5000" # the default port for accessing from the localhost is 5001. The service inside docker can be accessed from the port 5000.
     depends_on:
       - webhook-sender

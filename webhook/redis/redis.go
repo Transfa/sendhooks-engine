@@ -59,7 +59,6 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-
 			if err := processMessage(ctx, pubSub, webhookQueue); err != nil {
 				return err
 			}
@@ -89,7 +88,6 @@ func closePubSub(pubSub *redis.PubSub) {
 // processMessage retrieves, decodes, and dispatches a single message from the Redis channel.
 // Separating message processing into its own function to enhance testability and maintainability.
 func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan<- WebhookPayload) error {
-
 	msg, err := pubSub.ReceiveMessage(ctx)
 
 	if err != nil {

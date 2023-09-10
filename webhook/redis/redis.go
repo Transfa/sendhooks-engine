@@ -50,7 +50,6 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 
 	for {
 		if len(startedChan) > 0 {
-
 			startedChan[0] <- true
 			// Clear the channel slice so we don't send more signals. Needed and used for tests.
 			startedChan = nil

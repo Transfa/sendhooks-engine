@@ -12,11 +12,5 @@ def send_data():
     r.publish('hooks', json.dumps(payload))
     return jsonify({"status": "sent to channel"})
 
-@app.route('/webhook', methods=['POST'])
-def webhook_endpoint():
-    data = request.json
-    # Process the webhook data as needed
-    return jsonify(data)
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

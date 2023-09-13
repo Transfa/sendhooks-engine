@@ -1,29 +1,25 @@
-# Start from a Debian-based Golang official image
-FROM golang:1.21-alpine as builder
+# Use the official Go image from the DockerHub
+FROM golang:1.20 as builder
 
-# Set the working directory inside the container
+# We set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy the go mod and sum files
-COPY go.mod go.sum ./
-
-# Download all dependencies
-RUN go mod download
-
-# Copy the source code from your host to your image filesystem.
+# We copy everything from the current directory to the Working Directory inside the container
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o webhook .
 
-# Use a minimal alpine image for the final stage
-FROM alpine:latest
+#### Start a new stage from scratch ####
+FROM alpine:latest  
 
-# Set the working directory inside the container
+# Install CA certificates as we will need it when adding the Redis SSL configuration
+RUN apk --no-cache add ca-certificates 
+
 WORKDIR /root/
 
-# Copy the binary from the builder stage
-COPY --from=builder /app/main .
+# Copy the Pre-built binary file from the previous stage
+COPY --from=builder /app/webhook .
 
-# Run the binary
-CMD ["./main"]
+# Command to run the executable
+CMD ["./webhook"]

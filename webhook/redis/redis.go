@@ -80,7 +80,7 @@ func getRedisChannelName() string {
 // in a centralized manner.
 func closePubSub(pubSub *redis.PubSub) {
 	if err := pubSub.Close(); err != nil {
-		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("Error closing PubSub: %w", err))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error closing PubSub: %w", err))
 	}
 }
 
@@ -88,12 +88,14 @@ func closePubSub(pubSub *redis.PubSub) {
 // Separating message processing into its own function to enhance testability and maintainability.
 func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan<- WebhookPayload) error {
 	msg, err := pubSub.ReceiveMessage(ctx)
+
 	if err != nil {
 		return err
 	}
 
 	var payload WebhookPayload
 	if err = json.Unmarshal([]byte(msg.Payload), &payload); err != nil {
+
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error unmarshalling payload: %s", err))
 
 		return nil
@@ -103,6 +105,7 @@ func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan
 	// don't get stuck. Instead, we log the overflow and continue the execution.
 	select {
 	case webhookQueue <- payload:
+
 	case <-ctx.Done():
 		return ctx.Err()
 	default:

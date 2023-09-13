@@ -9,9 +9,13 @@ import (
 	"webhook/logging"
 )
 
-var HTTPClient = &http.Client{}
+type HTTPDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
 
-func marshalJSON(data interface{}) ([]byte, error) {
+var HTTPClient HTTPDoer = &http.Client{}
+
+var marshalJSON = func(data interface{}) ([]byte, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error marshaling JSON: %s", err))
@@ -20,7 +24,7 @@ func marshalJSON(data interface{}) ([]byte, error) {
 	return jsonBytes, nil
 }
 
-func prepareRequest(url string, jsonBytes []byte, secretHash string) (*http.Request, error) {
+var prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*http.Request, error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error during the webhook request preparation"))
@@ -36,7 +40,7 @@ func prepareRequest(url string, jsonBytes []byte, secretHash string) (*http.Requ
 	return req, nil
 }
 
-func sendRequest(req *http.Request) (*http.Response, error) {
+var sendRequest = func(req *http.Request) (*http.Response, error) {
 	resp, err := HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -44,13 +48,13 @@ func sendRequest(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func closeResponse(body io.ReadCloser) {
+var closeResponse = func(body io.ReadCloser) {
 	if err := body.Close(); err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error closing response body: %s", err))
 	}
 }
 
-func processResponse(resp *http.Response) (string, []byte, error) {
+var processResponse = func(resp *http.Response) (string, []byte, error) {
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error reading response body: %s", err))

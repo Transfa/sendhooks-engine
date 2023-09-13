@@ -25,6 +25,7 @@ const (
 )
 
 func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookPayload) {
+
 	for payload := range webhookQueue {
 		go sendWebhookWithRetries(payload)
 	}
@@ -54,6 +55,11 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 	for retries < maxRetries {
 		err := sender.SendWebhook(payload.Data, payload.Url, payload.WebhookId, payload.SecretHash)
 
+		if err == nil {
+			// Break the loop if the request has been delivered successfully.
+			break
+		}
+
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error sending webhook: %s", err))
 
 		backoffTime = calculateBackoff(backoffTime)
@@ -62,7 +68,7 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 		time.Sleep(backoffTime)
 	}
 
-	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %s", maxRetries))
+	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %d", maxRetries))
 
 	return nil
 }

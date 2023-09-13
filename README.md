@@ -1,65 +1,31 @@
-# sendhooks-engine
+# SendHooks Engine
+> ⚠️ **Warning**: This project is not stable yet.
 
-## Roadmap
+## Introduction
+SendHooks Engine is a powerful tool designed to handle webhook-related sending tasks. This document provides instructions on how to set up and run the project.
 
-## 1. Core Functionality
+## Installation
 
-### Data Integration
+### Using Docker
 
-- [X] Integration with Redis for data input.
-- [X] Set up a Redis channel for ingesting the data.
+1. **Pull the Docker Image**:
+   ```bash
+   docker pull koladev32/sendhooks:latest
+   ```
 
-### Sending Data
+2. **Run the Docker Image**:
+   ```bash
+   docker run -t sendhooks --env REDIS_ADDRESS=<REDIS_ADDRESS:PORT> koladev32/sendhooks
+   ```
 
-- [X] HTTP client setup to send data to the endpoint.
-- [X] Header configuration for the HTTP client.
+### Using the Compiled Binary (macOS and Linux)
 
-### Header Signing
+1. **Download and Run the Binary**:
+   ```bash
+   curl -LO https://github.com/koladev32/sendhooks-engine/releases/download/v0.0.1/webhook
+   chmod +x webhook
+   ./webhook
+   ```
 
-- [X] Algorithm selection for header signing (e.g., HMAC, RSA).
-- [X] Implementation of the signing process using a secret key.
-  
-## 2. Features and Enhancements
-
-### Exponential Backoff
-
-- [X] Implement an exponential backoff mechanism.
-- [ ] Tests to validate exponential backoff behavior.
-
-### Queuing
-
-- [X] Implement or integrate a queuing mechanism.
-- [ ] Ensure data integrity and no data loss during processing.
-
-### Retry Mechanism
-
-- [X] Implement a retry mechanism upon failure.
-- [X] Define max retry count and intervals.
-
-### Logging
-
-- [X] Logger setup for the project.
-- [X] Implement file-based persistent logging.
-
-## 3. Additional Considerations
-
-### Security
-
-- [X] Implementation of password security or other authentication methods for Redis.
-
-### Scalability
-
-- [X] Strategy for handling high concurrency using goroutines and worker pools.
-
-## Documentation and Community Building
-
-- [ ] Comprehensive documentation for setup, features, and usage.
-- [ ] Contribution guidelines for the community.
-- [ ] Discord community
-
-## Testing and Release
-
-- [ ] Comprehensive test coverage for all features.
-- [ ] Continuous Integration (CI) setup.
-- [ ] First major release with all the initial features.
-- [ ] Distribution in Dockerhub
+## Contributors
+We welcome contributions from the community. If you'd like to contribute, please check out our [list of issues](https://github.com/koladev32/sendhooks-engine/issues) to see how you can help.

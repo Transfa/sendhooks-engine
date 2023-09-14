@@ -2,6 +2,8 @@ package logging
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"time"
 )
@@ -31,11 +33,15 @@ var WebhookLogger = func(errorType string, errorMessage error) error {
 
 	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
+		fmt.Print("Failed to open log file: \n", err)
 		return err
 	}
 	defer file.Close()
 
+	multi := io.MultiWriter(os.Stdout, file)
+	log.SetOutput(multi)
+
 	logEntry := fmt.Sprintf("%s - %s - %s\n", errorType, currentDateTime(), errorMessage)
-	_, err = file.WriteString(logEntry)
+	_, err = log.Writer().Write([]byte(logEntry))
 	return err
 }

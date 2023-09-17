@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+- Add Conditional SSL Support for Redis Connection (#21)
+
 ## [0.0.1] - 2023-09-10
 
 ### Added

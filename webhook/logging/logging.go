@@ -36,7 +36,12 @@ var WebhookLogger = func(errorType string, errorMessage error) error {
 		fmt.Print("Failed to open log file: \n", err)
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println("Failed to close file", err)
+		}
+	}(file)
 
 	multi := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(multi)

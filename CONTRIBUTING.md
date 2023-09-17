@@ -20,7 +20,21 @@ This guide outlines the process for contributing to SendHooks Engine. We encoura
 
 Before you start contributing, make sure you have set up your development environment:
 
-1. [Instructions for setting up the development environment]
+```bash
+git clone https://github.com/koladev32/sendhooks-engine.git && cd webhooks
+```
+
+At the moment, we are working with Go 1.2.  
+
+To ensure the reliability and correctness of your code changes, it's important to run tests before submitting your pull request.
+
+```bash
+go test -cover ./...
+```
+
+```bash
+go test ./...
+```
 
 ## Submitting Pull Requests
 

@@ -22,6 +22,8 @@ Before you start contributing, make sure you have set up your development enviro
 
 ```bash
 git clone https://github.com/koladev32/sendhooks-engine.git && cd webhooks
+
+go mod download
 ```
 
 At the moment, we are working with Go 1.2.  

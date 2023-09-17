@@ -2,22 +2,26 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"webhook/logging"
+	"webhook/queue"
 	redisClient "webhook/redis"
 
-	"webhook/queue"
-
-	"github.com/go-redis/redis/v8" // Make sure to use the correct version
+	"github.com/go-redis/redis/v8"
 )
 
 func main() {
 	// Create a context
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	err := logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
 
 	redisAddress := os.Getenv("REDIS_ADDRESS")
 	if redisAddress == "" {
@@ -29,26 +33,86 @@ func main() {
 		redisPassword = "" // Default password (empty in this case)
 	}
 
-	client := redis.NewClient(&redis.Options{
-		Addr:     redisAddress,
-		Password: redisPassword,
-		DB:       0, // Default DB
-	})
+	client, err := createRedisClient()
+	if err != nil {
+		log.Fatalf("Failed to create Redis client: %v", err)
+	}
+	log.Println(redisPassword, redisAddress)
+
 	// Create a channel to act as the queue
 	webhookQueue := make(chan redisClient.WebhookPayload, 100) // Buffer size 100
 
 	go queue.ProcessWebhooks(ctx, webhookQueue)
 
 	// Subscribe to the "transactions" channel
-	err := redisClient.Subscribe(ctx, client, webhookQueue)
+	err = redisClient.Subscribe(ctx, client, webhookQueue)
 
 	if err != nil {
-		err := logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))
-		if err != nil {
-			log.Println(err)
-		}
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))
+		log.Fatalf("error initializing connection: %v", err)
+		return
 	}
 
 	select {}
+}
 
+func createRedisClient() (*redis.Client, error) {
+	redisAddress := os.Getenv("REDIS_ADDRESS")
+	if redisAddress == "" {
+		redisAddress = "localhost:6379" // Default address
+	}
+
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+
+	// SSL/TLS configuration
+	useSSL := strings.ToLower(os.Getenv("REDIS_SSL")) == "true"
+	var tlsConfig *tls.Config
+
+	if useSSL {
+		caCertPath := os.Getenv("REDIS_CA_CERT")
+		clientCertPath := os.Getenv("REDIS_CLIENT_CERT")
+		clientKeyPath := os.Getenv("REDIS_CLIENT_KEY")
+
+		var err error
+		tlsConfig, err = createTLSConfig(caCertPath, clientCertPath, clientKeyPath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr:      redisAddress,
+		Password:  redisPassword,
+		DB:        0,
+		TLSConfig: tlsConfig,
+	})
+
+	return client, nil
+}
+
+func createTLSConfig(caCertPath, clientCertPath, clientKeyPath string) (*tls.Config, error) {
+	// Load CA cert
+	caCert, err := os.ReadFile(caCertPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load CA certificate: %v", err)
+	}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	tlsConfig := &tls.Config{
+		RootCAs: caCertPool,
+	}
+
+	// Load client cert and key if they're provided
+	if clientCertPath != "" && clientKeyPath != "" {
+		cert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load client cert and key: %v", err)
+		}
+
+		tlsConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	return tlsConfig, nil
 }

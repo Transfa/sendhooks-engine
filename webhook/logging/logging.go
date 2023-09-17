@@ -15,6 +15,7 @@ import (
 const (
 	ErrorType   = "ERROR"
 	WarningType = "WARNING"
+	EventType   = "EVENT"
 )
 
 // currentDate retrieves the current date in "YYYY-MM-DD" format.
@@ -27,7 +28,19 @@ func currentDateTime() string {
 	return time.Now().Format("2006-01-02 15:04:05")
 }
 
-var WebhookLogger = func(errorType string, errorMessage error) error {
+var WebhookLogger = func(errorType string, message interface{}) error {
+
+	var messageString string
+
+	switch v := message.(type) {
+	case error:
+		messageString = v.Error()
+	case string:
+		messageString = v
+	default:
+		return fmt.Errorf("unsupported message type: %T", message)
+	}
+
 	logFileDate := currentDate()
 	logFileName := fmt.Sprintf("%s.log", logFileDate)
 
@@ -46,7 +59,7 @@ var WebhookLogger = func(errorType string, errorMessage error) error {
 	multi := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(multi)
 
-	logEntry := fmt.Sprintf("%s - %s - %s\n", errorType, currentDateTime(), errorMessage)
+	logEntry := fmt.Sprintf("%s - %s - %s\n", errorType, currentDateTime(), messageString)
 	_, err = log.Writer().Write([]byte(logEntry))
 	return err
 }

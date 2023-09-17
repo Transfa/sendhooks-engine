@@ -32,4 +32,4 @@ We welcome contributions from the community. If you'd like to contribute, please
 
 ## Security
 
-You can find our security policies on `SECURITY.md`.
+You can find our security policies on [SECURITY](SECURITY.md).

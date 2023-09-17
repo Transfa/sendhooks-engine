@@ -7,7 +7,6 @@ Thank you for considering contributing to SendHooks Engine! We appreciate your h
 - [Introduction](#introduction)
 - [Development Environment Setup](#development-environment-setup)
 - [Submitting Pull Requests](#submitting-pull-requests)
-- [Coding Standards and Style Guidelines](#coding-standards-and-style-guidelines)
 - [Reporting Bugs or Proposing Features](#reporting-bugs-or-proposing-features)
 - [Running Tests](#running-tests)
 - [Project-Specific Guidelines and Expectations](#project-specific-guidelines-and-expectations)
@@ -26,17 +25,7 @@ git clone https://github.com/koladev32/sendhooks-engine.git && cd webhooks
 go mod download
 ```
 
-At the moment, we are working with Go 1.2.  
-
-To ensure the reliability and correctness of your code changes, it's important to run tests before submitting your pull request.
-
-```bash
-go test -cover ./...
-```
-
-```bash
-go test ./...
-```
+At the moment, we are working with Go 1.2.
 
 ## Submitting Pull Requests
 
@@ -47,12 +36,6 @@ If you want to contribute code changes or bug fixes, please follow these steps:
 3. Make your changes and commit them.
 4. Push your changes to your forked repository.
 5. Submit a pull request to the `main` branch of the SendHooks Engine repository.
-
-## Coding Standards and Style Guidelines
-
-When contributing code, follow our coding standards and style guidelines:
-
-1. [Coding standards and style guidelines]
 
 ## Reporting Bugs or Proposing Features
 
@@ -81,9 +64,11 @@ docker run -t sendhooks --env REDIS_ADDRESS=<REDIS_ADDRESS:PORT> sendhooks
 
 ## Running Tests
 
-Ensure your changes pass our tests:
+To ensure the reliability and correctness of your code changes, it's important to run tests before submitting your pull request.
 
-1. [Instructions for running tests]
+```bash
+go test -v ./...
+```
 
 ## Project-Specific Guidelines and Expectations
 

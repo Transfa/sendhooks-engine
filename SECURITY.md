@@ -13,7 +13,6 @@ To report a security vulnerability, please follow these steps:
     - Steps to reproduce the vulnerability.
     - Information about the affected versions of Sendhooks, if applicable.
 
-3. If you believe the vulnerability is critical or sensitive, please encrypt your email using our PGP public key, which you can find on our website or public key servers.
 
 ## Expectations
 

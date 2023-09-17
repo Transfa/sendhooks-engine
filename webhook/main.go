@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"webhook/logging"
 	"webhook/queue"
 	redisClient "webhook/redis"
+	redis_tls_config "webhook/utils"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -74,7 +74,7 @@ func createRedisClient() (*redis.Client, error) {
 		clientKeyPath := os.Getenv("REDIS_CLIENT_KEY")
 
 		var err error
-		tlsConfig, err = createTLSConfig(caCertPath, clientCertPath, clientKeyPath)
+		tlsConfig, err = redis_tls_config.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)
 		if err != nil {
 			return nil, err
 		}
@@ -88,31 +88,4 @@ func createRedisClient() (*redis.Client, error) {
 	})
 
 	return client, nil
-}
-
-func createTLSConfig(caCertPath, clientCertPath, clientKeyPath string) (*tls.Config, error) {
-	// Load CA cert
-	caCert, err := os.ReadFile(caCertPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load CA certificate: %v", err)
-	}
-
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	tlsConfig := &tls.Config{
-		RootCAs: caCertPool,
-	}
-
-	// Load client cert and key if they're provided
-	if clientCertPath != "" && clientKeyPath != "" {
-		cert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to load client cert and key: %v", err)
-		}
-
-		tlsConfig.Certificates = []tls.Certificate{cert}
-	}
-
-	return tlsConfig, nil
 }

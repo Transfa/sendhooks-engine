@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+- Adding a SECURITY.md file( #29)
+
 ## [0.0.1] - 2023-09-10
 
 ### Added

@@ -29,3 +29,5 @@ SendHooks Engine is a powerful tool designed to handle webhook-related sending t
 
 ## Contributors
 We welcome contributions from the community. If you'd like to contribute, please check out our [list of issues](https://github.com/koladev32/sendhooks-engine/issues) to see how you can help.
+
+You can find how to contribute in the [CONTRIBUTING](CONTRIBUTING.md) file.

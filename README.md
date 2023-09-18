@@ -1,5 +1,5 @@
 # SendHooks Engine
-> ⚠️ **Warning**: This project is not stable yet.
+> ⚠️ **Warning**: This project is not stable yet. Feel free to join the Discord so we can build together https://discord.gg/w2fBSz3j
 
 ## Introduction
 SendHooks Engine is a powerful tool designed to handle webhook-related sending tasks. This document provides instructions on how to set up and run the project.
@@ -29,3 +29,9 @@ SendHooks Engine is a powerful tool designed to handle webhook-related sending t
 
 ## Contributors
 We welcome contributions from the community. If you'd like to contribute, please check out our [list of issues](https://github.com/koladev32/sendhooks-engine/issues) to see how you can help.
+
+You can find how to contribute in the [CONTRIBUTING](CONTRIBUTING.md) file.
+
+## Security
+
+You can find our security policies on [SECURITY](SECURITY.md).

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"webhook/logging"
@@ -23,21 +24,10 @@ func main() {
 
 	err := logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
 
-	redisAddress := os.Getenv("REDIS_ADDRESS")
-	if redisAddress == "" {
-		redisAddress = "localhost:6379" // Default address
-	}
-
-	redisPassword := os.Getenv("REDIS_PASSWORD")
-	if redisPassword == "" {
-		redisPassword = "" // Default password (empty in this case)
-	}
-
 	client, err := createRedisClient()
 	if err != nil {
 		log.Fatalf("Failed to create Redis client: %v", err)
 	}
-	log.Println(redisPassword, redisAddress)
 
 	// Create a channel to act as the queue
 	webhookQueue := make(chan redisClient.WebhookPayload, 100) // Buffer size 100
@@ -62,6 +52,13 @@ func createRedisClient() (*redis.Client, error) {
 		redisAddress = "localhost:6379" // Default address
 	}
 
+	redisDB := os.Getenv("REDIS_DB")
+	if redisDB == "" {
+		redisDB = "0" // Default database
+	}
+
+	redisDBInt, _ := strconv.Atoi(redisDB)
+
 	redisPassword := os.Getenv("REDIS_PASSWORD")
 
 	// SSL/TLS configuration
@@ -83,7 +80,7 @@ func createRedisClient() (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:      redisAddress,
 		Password:  redisPassword,
-		DB:        0,
+		DB:        redisDBInt,
 		TLSConfig: tlsConfig,
 	})
 

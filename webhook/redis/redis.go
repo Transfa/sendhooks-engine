@@ -25,12 +25,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// This type will be useful in the context of mocking for requests in tests.
-type RedisClient interface {
-	Subscribe(ctx context.Context, channel string) *redis.PubSub
-}
-
-// This type represents the expected structure of the data from Redis. It contains
+// WebhookPayload This type represents the expected structure of the data from Redis. It contains
 // the webhook URL, its ID, and the relevant data to be sent. There is no strict type on the data
 // as it the structure can definitely vary.
 type WebhookPayload struct {
@@ -51,7 +46,7 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 	for {
 		if len(startedChan) > 0 {
 			startedChan[0] <- true
-			// Clear the channel slice so we don't send more signals. Needed and used for tests.
+			// Clear the channel slice, so we don't send more signals. Needed and used for tests.
 			startedChan = nil
 		}
 		select {

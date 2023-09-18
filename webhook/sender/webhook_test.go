@@ -16,7 +16,7 @@ var (
 )
 
 func TestSendWebhook(t *testing.T) {
-	logging.WebhookLogger = func(errorType string, errorMessage error) error {
+	logging.WebhookLogger = func(errorType string, errorMessage interface{}) error {
 		webhookLoggerInvoked = true
 		return nil
 	}

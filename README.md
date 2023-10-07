@@ -1,5 +1,5 @@
 # SendHooks Engine
-> ⚠️ **Warning**: This project is not stable yet. Feel free to join the Discord so we can build together https://discord.gg/w2fBSz3j
+> ⚠️ **Warning**: This project is not stable yet. Feel free to join the Discord so we can build together [https://discord.gg/w2fBSz3j](https://discord.gg/2mHxEgxm5r)
 
 ## Introduction
 SendHooks Engine is a powerful tool designed to handle webhook-related sending tasks. This document provides instructions on how to set up and run the project.

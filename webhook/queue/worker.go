@@ -8,8 +8,10 @@ we also handle the retries and the exponential backoff logic for sending the hoo
 import (
 	"context"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"time"
 	"webhook/logging"
+	"webhook/redis_status"
 	"webhook/sender"
 
 	redisClient "webhook/redis"
@@ -24,16 +26,20 @@ const (
 	maxBackoff     time.Duration = time.Hour
 )
 
-func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookPayload) {
+func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookPayload, client *redis.Client) {
 
 	for payload := range webhookQueue {
-		go sendWebhookWithRetries(payload)
+		go sendWebhookWithRetries(payload, client)
 	}
 }
 
-func sendWebhookWithRetries(payload redisClient.WebhookPayload) {
-	if err := retryWithExponentialBackoff(payload); err != nil {
+func sendWebhookWithRetries(payload redisClient.WebhookPayload, client *redis.Client) {
+	if err := retryWithExponentialBackoff(payload, client); err != nil {
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send webhook after maximum retries. WebhookID : %s", payload.WebhookId))
+		err := redis_status.PublishStatus(payload.WebhookId, "failed", err.Error(), client)
+		if err != nil {
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update:", err))
+		}
 	}
 }
 
@@ -48,7 +54,7 @@ func calculateBackoff(currentBackoff time.Duration) time.Duration {
 	return nextBackoff
 }
 
-func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
+func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *redis.Client) error {
 	retries := 0
 	backoffTime := initialBackoff
 
@@ -56,6 +62,10 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload) error {
 		err := sender.SendWebhook(payload.Data, payload.Url, payload.WebhookId, payload.SecretHash)
 
 		if err == nil {
+			err := redis_status.PublishStatus(payload.WebhookId, "success", "", client)
+			if err != nil {
+				logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update:", err))
+			}
 			// Break the loop if the request has been delivered successfully.
 			break
 		}

@@ -38,7 +38,7 @@ func sendWebhookWithRetries(payload redisClient.WebhookPayload, client *redis.Cl
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send webhook after maximum retries. WebhookID : %s", payload.WebhookId))
 		err := redis_status.PublishStatus(payload.WebhookId, "failed", err.Error(), client)
 		if err != nil {
-			logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update:", err))
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update: WebhookID : %s ", payload.WebhookId))
 		}
 	}
 }
@@ -64,7 +64,7 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *red
 		if err == nil {
 			err := redis_status.PublishStatus(payload.WebhookId, "success", "", client)
 			if err != nil {
-				logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update:", err))
+				logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update WebhookID : %s ", payload.WebhookId))
 			}
 			// Break the loop if the request has been delivered successfully.
 			break

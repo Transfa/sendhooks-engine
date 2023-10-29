@@ -8,11 +8,12 @@ we also handle the retries and the exponential backoff logic for sending the hoo
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis/v8"
 	"time"
 	"webhook/logging"
 	"webhook/redis_status"
 	"webhook/sender"
+
+	"github.com/go-redis/redis/v8"
 
 	redisClient "webhook/redis"
 )
@@ -38,7 +39,7 @@ func sendWebhookWithRetries(payload redisClient.WebhookPayload, client *redis.Cl
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send webhook after maximum retries. WebhookID : %s", payload.WebhookId))
 		err := redis_status.PublishStatus(payload.WebhookId, "failed", err.Error(), client)
 		if err != nil {
-			logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update: WebhookID : %s ", payload.WebhookId))
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update: WebhookID : %s ", payload.WebhookId))
 		}
 	}
 }
@@ -57,6 +58,7 @@ func calculateBackoff(currentBackoff time.Duration) time.Duration {
 func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *redis.Client) error {
 	retries := 0
 	backoffTime := initialBackoff
+	var requestError error
 
 	for retries < maxRetries {
 		err := sender.SendWebhook(payload.Data, payload.Url, payload.WebhookId, payload.SecretHash)
@@ -64,9 +66,10 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *red
 		if err == nil {
 			err := redis_status.PublishStatus(payload.WebhookId, "success", "", client)
 			if err != nil {
-				logging.WebhookLogger(logging.WarningType, fmt.Errorf("Error publishing status update WebhookID : %s ", payload.WebhookId))
+				logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update WebhookID : %s ", payload.WebhookId))
 			}
 			// Break the loop if the request has been delivered successfully.
+			requestError = nil
 			break
 		}
 
@@ -74,11 +77,15 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *red
 
 		backoffTime = calculateBackoff(backoffTime)
 		retries++
-
+		requestError = err
 		time.Sleep(backoffTime)
 	}
 
-	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %d", maxRetries))
+	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %d", retries))
+
+	if requestError != nil {
+		return requestError
+	}
 
 	return nil
 }

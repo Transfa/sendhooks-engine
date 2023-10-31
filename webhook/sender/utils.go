@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"webhook/logging"
 )
 
@@ -33,8 +34,13 @@ var prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*htt
 
 	req.Header.Set("Content-Type", "application/json")
 
+	secretHashHeaderName := os.Getenv("SECRET_HASH_HEADER_NAME");
+	if  secretHashHeaderName == "" {
+		secretHashHeaderName = "X-Secret-Hash"
+	}
+
 	if secretHash != "" {
-		req.Header.Set("X-Secret-Hash", secretHash)
+		req.Header.Set(secretHashHeaderName, secretHash)
 	}
 
 	return req, nil

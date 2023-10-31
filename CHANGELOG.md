@@ -7,12 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+### Added
+
+### Fixed
+
+## [Unreleased] - 2023-10-31
+
+### Added
+
 - Make Header Name Dynamic through Environment Variable (#40)
 - Implement Redis Channel for Webhook Delivery Status Updates (#11)
 - Add a .env.example file (#36)
 - Add Conditional SSL Support for Redis Connection (#21)
 - Adding a CONTRIBUTING.md file (#27)
 - Adding a SECURITY.md file( #29)
+
 
 ## [0.0.1] - 2023-09-10
 

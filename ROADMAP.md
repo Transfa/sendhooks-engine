@@ -52,9 +52,9 @@
 
 ## Documentation and Community Building
 
-- [ ] Comprehensive documentation for setup, features, and usage.
-- [ ] Contribution guidelines for the community.
-- [ ] Discord community
+- [X] Comprehensive documentation for setup, features, and usage.
+- [X] Contribution guidelines for the community.
+- [X] Discord community
 
 ## Testing and Release
 

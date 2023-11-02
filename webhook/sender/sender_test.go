@@ -11,6 +11,8 @@ import (
 	"io"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type MockClient struct {
@@ -29,13 +31,10 @@ func TestMarshalJSON(t *testing.T) {
 	expectedJSON := `{"key":"value"}`
 
 	jsonBytes, err := marshalJSON(data)
-	if err != nil {
-		t.Fatalf("Expected no error, but got: %v", err)
-	}
 
-	if string(jsonBytes) != expectedJSON {
-		t.Fatalf("Expected %s, but got %s", expectedJSON, string(jsonBytes))
-	}
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedJSON, string(jsonBytes))
 }
 
 // Test for prepareRequest
@@ -45,17 +44,12 @@ func TestPrepareRequest(t *testing.T) {
 	secretHash := "secret123"
 
 	req, err := prepareRequest(url, jsonBytes, secretHash)
-	if err != nil {
-		t.Fatalf("Expected no error, but got: %v", err)
-	}
 
-	if req.Header.Get("Content-Type") != "application/json" {
-		t.Fatalf("Expected header Content-Type to be application/json but got %s", req.Header.Get("Content-Type"))
-	}
+	assert.NoError(t, err)
 
-	if req.Header.Get("X-Secret-Hash") != secretHash {
-		t.Fatalf("Expected header X-Secret-Hash to be %s but got %s", secretHash, req.Header.Get("X-Secret-Hash"))
-	}
+	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+
+	assert.Equal(t, secretHash, req.Header.Get("X-Secret-Hash"))
 }
 
 func TestSendRequest(t *testing.T) {
@@ -70,12 +64,11 @@ func TestSendRequest(t *testing.T) {
 
 	req, _ := http.NewRequest("GET", "http://example.com", nil)
 	resp, err := sendRequest(req)
-	if err != nil {
-		t.Fatalf("Expected no error, but got: %v", err)
-	}
-
+	
+	assert.NoError(t, err)
+	
 	body, _ := io.ReadAll(resp.Body)
-	if string(body) != "OK" {
-		t.Fatalf("Expected body to be OK but got %s", string(body))
-	}
+
+	assert.Equal(t, 200, resp.StatusCode)
+	assert.Equal(t, "OK", string(body))
 }

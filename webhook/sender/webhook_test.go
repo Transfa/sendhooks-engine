@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 	"webhook/logging"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -25,9 +27,8 @@ func TestSendWebhook(t *testing.T) {
 		resetMocks() // Reset all mocks to original functions
 
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
-		if err != nil {
-			t.Fatalf("Expected no error, but got: %v", err)
-		}
+
+		assert.NoError(t, err)
 	})
 
 	t.Run("Failed webhook due to marshaling errors", func(t *testing.T) {
@@ -37,9 +38,8 @@ func TestSendWebhook(t *testing.T) {
 		}
 
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
-		if err == nil || err.Error() != "marshaling error" {
-			t.Fatalf("Expected marshaling error, but got: %v", err)
-		}
+
+		assert.EqualError(t, err, "marshaling error")
 	})
 
 	t.Run("Failed webhook due to request preparation errors", func(t *testing.T) {
@@ -49,9 +49,8 @@ func TestSendWebhook(t *testing.T) {
 		}
 
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
-		if err == nil || err.Error() != "request preparation error" {
-			t.Fatalf("Expected request preparation error, but got: %v", err)
-		}
+
+		assert.EqualError(t, err, "request preparation error")
 	})
 
 	t.Run("Failed webhook due to response processing errors", func(t *testing.T) {
@@ -61,9 +60,8 @@ func TestSendWebhook(t *testing.T) {
 		}
 
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
-		if err == nil || err.Error() != "response processing error" {
-			t.Fatalf("Expected response processing error, but got: %v", err)
-		}
+
+		assert.EqualError(t, err, "response processing error")
 	})
 
 	t.Run("Logging on failed webhook delivery", func(t *testing.T) {
@@ -72,15 +70,12 @@ func TestSendWebhook(t *testing.T) {
 			return "failed", []byte("error body"), nil
 		}
 
-		webhookLoggerInvoked = false
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
-		if err == nil || err.Error() != "failed" {
-			t.Fatalf("Expected failed status, but got: %v", err)
+		if !webhookLoggerInvoked {
+			assert.Fail(t, "Expected WebhookLogger to be invoked")
 		}
 
-		if !webhookLoggerInvoked {
-			t.Fatalf("Expected WebhookLogger to be invoked")
-		}
+		assert.EqualError(t, err, "failed")
 	})
 }
 

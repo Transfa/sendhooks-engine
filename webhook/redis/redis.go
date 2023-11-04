@@ -17,7 +17,6 @@ and handles message processing.
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"webhook/logging"
@@ -35,13 +34,19 @@ type WebhookPayload struct {
 	SecretHash string                 `json:"secretHash"`
 }
 
+type WebhookPayloadResponse struct {
+	Url       string `json:"url"`
+	Id        string `json:"id"`
+	status    string `json:"status"`
+	created   string `json:"created"`
+	delivered string `json:"delivered"`
+	error     string `json:"error"`
+}
+
 // Subscribe initializes a subscription to a Redis channel and continuously listens for messages.
 // It decodes these messages into WebhookPayload and sends them to a provided channel.
 func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
-	channelName := getRedisChannelName()
-
-	pubSub := client.Subscribe(ctx, channelName)
-	defer closePubSub(pubSub)
+	streamName := getRedisStreamName()
 
 	for {
 		if len(startedChan) > 0 {
@@ -53,16 +58,16 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			if err := processMessage(ctx, pubSub, webhookQueue); err != nil {
+			if err := processMessage(ctx, client, streamName, webhookQueue); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-// getRedisChannelName fetches the Redis channel name from an environment variable.
+// getRedisStreamName fetches the Redis channel name from an environment variable.
 // It defaults to "hooks" if not set.
-func getRedisChannelName() string {
+func getRedisStreamName() string {
 	channel := os.Getenv("REDIS_CHANNEL_NAME")
 	if channel == "" {
 		channel = "hooks"
@@ -70,42 +75,74 @@ func getRedisChannelName() string {
 	return channel
 }
 
-// closePubSub is a utility function to close the PubSub connection.
-// Separating this as a function to handle any errors during closure
-// in a centralized manner.
-func closePubSub(pubSub *redis.PubSub) {
-	if err := pubSub.Close(); err != nil {
-		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error closing PubSub: %w", err))
+func addMessageToStream(ctx context.Context, client *redis.Client, streamName string, message WebhookPayloadResponse) error {
+	// Convert your message struct to a map[string]interface{} for XAdd.
+	msgMap := map[string]interface{}{
+		"url":       message.Url,
+		"id":        message.Id,
+		"status":    message.status,
+		"created":   message.created,
+		"delivered": message.delivered,
+		"error":     message.error,
 	}
+
+	// The "*" ID tells Redis to auto-generate a unique ID for the message.
+	_, err := client.XAdd(ctx, &redis.XAddArgs{
+		Stream: streamName,
+		Values: msgMap,
+	}).Result()
+
+	return err
+}
+
+func readMessagesFromStream(ctx context.Context, client *redis.Client, streamName string) ([]WebhookPayload, error) {
+	entries, err := client.XRead(ctx, &redis.XReadArgs{
+		Streams: []string{streamName, "0"}, // Read from the last ID.
+		Count:   100,
+		Block:   0,
+	}).Result()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var messages []WebhookPayload
+	for _, entry := range entries[0].Messages {
+		message := WebhookPayload{
+			Url:        entry.Values["url"].(string),
+			SecretHash: entry.Values["url"].(string),
+			WebhookId:  entry.Values["webhookId"].(string),
+			Data:       entry.Values["data"].(map[string]interface{}),
+		}
+		messages = append(messages, message)
+	}
+
+	return messages, nil
 }
 
 // processMessage retrieves, decodes, and dispatches a single message from the Redis channel.
 // Separating message processing into its own function to enhance testability and maintainability.
-func processMessage(ctx context.Context, pubSub *redis.PubSub, webhookQueue chan<- WebhookPayload) error {
-	msg, err := pubSub.ReceiveMessage(ctx)
+func processMessage(ctx context.Context, client *redis.Client, streamName string, webhookQueue chan<- WebhookPayload) error {
+	messages, err := readMessagesFromStream(ctx, client, streamName)
 
 	if err != nil {
 		return err
 	}
 
-	var payload WebhookPayload
-	if err = json.Unmarshal([]byte(msg.Payload), &payload); err != nil {
+	for index := 0; index < len(messages); index++ {
+		payload := messages[index]
 
-		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error unmarshalling payload: %s", err))
+		// Non-blocking write to the webhookQueue. This ensures that if the queue is full, we
+		// don't get stuck. Instead, we log the overflow and continue the execution.
+		select {
+		case webhookQueue <- payload:
 
-		return nil
-	}
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped webhook due to channel overflow. Webhook ID: %s", payload.WebhookId))
 
-	// Non-blocking write to the webhookQueue. This ensures that if the queue is full, we
-	// don't get stuck. Instead, we log the overflow and continue the execution.
-	select {
-	case webhookQueue <- payload:
-
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped webhook due to channel overflow. Webhook ID: %s", payload.WebhookId))
-
+		}
 	}
 
 	return nil

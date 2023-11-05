@@ -20,6 +20,7 @@ func SendWebhook(data interface{}, url string, webhookId string, secretHash stri
 
 	resp, err := sendRequest(req)
 	if err != nil {
+
 		return err
 	}
 

@@ -12,7 +12,6 @@ import (
 	"webhook/logging"
 	"webhook/queue"
 	redisClient "webhook/redis"
-	redisWebhookStatusClient "webhook/redis_status"
 	redis_tls_config "webhook/utils"
 
 	"github.com/go-redis/redis/v8"
@@ -23,7 +22,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	err := logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
+	logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
 
 	client, err := createRedisClient()
 	if err != nil {
@@ -36,10 +35,7 @@ func main() {
 	go queue.ProcessWebhooks(ctx, webhookQueue, client)
 
 	// Subscribe to the "transactions" channel
-	err = redisClient.Subscribe(ctx, client, webhookQueue)
-
-	// Subscribe to the "webhook status updates" channel
-	err = redisWebhookStatusClient.Subscribe(ctx, client)
+	err = redisClient.SubscribeToStream(ctx, client, "hooksGroup", "hooksConsumers", webhookQueue)
 
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))

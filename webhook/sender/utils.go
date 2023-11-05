@@ -34,8 +34,8 @@ var prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*htt
 
 	req.Header.Set("Content-Type", "application/json")
 
-	secretHashHeaderName := os.Getenv("SECRET_HASH_HEADER_NAME");
-	if  secretHashHeaderName == "" {
+	secretHashHeaderName := os.Getenv("SECRET_HASH_HEADER_NAME")
+	if secretHashHeaderName == "" {
 		secretHashHeaderName = "X-Secret-Hash"
 	}
 
@@ -48,6 +48,7 @@ var prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*htt
 
 var sendRequest = func(req *http.Request) (*http.Response, error) {
 	resp, err := HTTPClient.Do(req)
+
 	if err != nil {
 		return nil, err
 	}

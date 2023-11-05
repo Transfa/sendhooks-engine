@@ -35,7 +35,7 @@ func main() {
 	go queue.ProcessWebhooks(ctx, webhookQueue, client)
 
 	// Subscribe to the "transactions" channel
-	err = redisClient.SubscribeToStream(ctx, client, "hooksGroup", "hooksConsumers", webhookQueue)
+	err = redisClient.SubscribeToStream(ctx, client, webhookQueue)
 
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))

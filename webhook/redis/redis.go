@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 	"webhook/logging"
@@ -31,6 +30,7 @@ import (
 type WebhookPayload struct {
 	URL        string                 `json:"url"`
 	WebhookID  string                 `json:"webhookId"`
+	MessageID  string                 `json:"messageId"`
 	Data       map[string]interface{} `json:"data"`
 	SecretHash string                 `json:"secretHash"`
 }
@@ -46,12 +46,8 @@ type WebhookDeliveryStatus struct {
 }
 
 // SubscribeToStream initializes a subscription to a Redis stream and continuously listens for messages.
-func SubscribeToStream(ctx context.Context, client *redis.Client, groupName string, consumerName string, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
+func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
 	streamName := getRedisSubStreamName()
-
-	if err := createConsumerGroup(ctx, client, streamName, groupName, "$"); err != nil {
-		return err
-	}
 
 	for {
 		if len(startedChan) > 0 {
@@ -62,7 +58,7 @@ func SubscribeToStream(ctx context.Context, client *redis.Client, groupName stri
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			if err := processStreamMessages(ctx, client, streamName, groupName, consumerName, webhookQueue); err != nil {
+			if err := processStreamMessages(ctx, client, streamName, webhookQueue); err != nil {
 				return err
 			}
 		}
@@ -70,10 +66,8 @@ func SubscribeToStream(ctx context.Context, client *redis.Client, groupName stri
 }
 
 // processStreamMessages retrieves, decodes, and dispatches messages from the Redis stream.
-func processStreamMessages(ctx context.Context, client *redis.Client, streamName string, groupName string, consumerName string, webhookQueue chan<- WebhookPayload) error {
-	messages, lastID, err := readMessagesFromStream(ctx, client, streamName, groupName, consumerName)
-
-	log.Println(messages)
+func processStreamMessages(ctx context.Context, client *redis.Client, streamName string, webhookQueue chan<- WebhookPayload) error {
+	messages, err := readMessagesFromStream(ctx, client, streamName)
 
 	if err != nil {
 		return err
@@ -82,8 +76,9 @@ func processStreamMessages(ctx context.Context, client *redis.Client, streamName
 	for _, payload := range messages {
 		select {
 		case webhookQueue <- payload:
-			if ackErr := acknowledgeMessage(ctx, client, streamName, groupName, lastID); ackErr != nil {
-				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error acknowledging message: %w", ackErr))
+			_, delErr := client.XDel(ctx, streamName, payload.MessageID).Result()
+			if delErr != nil {
+				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("failed to delete message %s: %v", payload.MessageID, delErr))
 			}
 		case <-ctx.Done():
 			return ctx.Err()
@@ -96,16 +91,13 @@ func processStreamMessages(ctx context.Context, client *redis.Client, streamName
 }
 
 // readMessagesFromStream reads messages from a Redis stream and returns them.
-func readMessagesFromStream(ctx context.Context, client *redis.Client, streamName, groupName, consumerName string) ([]WebhookPayload, string, error) {
-	lastReadID := "0" // Start reading from the beginning of the stream
+func readMessagesFromStream(ctx context.Context, client *redis.Client, streamName string) ([]WebhookPayload, error) {
+	lastID := "0" // Start reading from the beginning of the stream
 
-	entries, err := client.XReadGroup(ctx, &redis.XReadGroupArgs{
-		Group:    groupName,
-		Consumer: consumerName,
-		Streams:  []string{streamName, lastReadID},
-		Count:    5,
-		Block:    0,
-		NoAck:    false, // Set to true if you don't want to use XACK later
+	entries, err := client.XRead(ctx, &redis.XReadArgs{
+		Streams: []string{streamName, lastID},
+		Count:   5,
+		Block:   0,
 	}).Result()
 
 	if err != nil {
@@ -114,9 +106,9 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 			time.Sleep(time.Second)
 			// If you want to continue trying, you can loop or use recursion
 			// For a single batch read, you should return here
-			return nil, "", nil
+			return nil, nil
 		}
-		return nil, "", err
+		return nil, err
 	}
 
 	var messages []WebhookPayload
@@ -127,24 +119,26 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 		if data, ok := entry.Values["data"].(string); ok {
 			if err := json.Unmarshal([]byte(data), &payload); err != nil {
 				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error unmarshalling message data: %w", err))
-				return nil, "", err
+				return nil, err
 
 			}
 		} else {
 			logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error: expected string for 'data' field but got %T", entry.Values["data"]))
-			return nil, "", err
+			return nil, err
 
 		}
+
+		payload.MessageID = entry.ID
 
 		messages = append(messages, payload)
 
 		// Update lastID to the ID of the last message read
-		lastReadID = entry.ID
+		lastID = entry.ID
 
 		continue
 	}
 
-	return messages, lastReadID, nil
+	return messages, nil
 }
 
 // getRedisSubStreamName fetches the Redis stream name from an environment variable.
@@ -198,22 +192,6 @@ func (wds WebhookDeliveryStatus) toMap() (map[string]interface{}, error) {
 	return msgMap, nil
 }
 
-// acknowledgeMessage marks a message as processed in the given stream and consumer group.
-func acknowledgeMessage(ctx context.Context, client *redis.Client, streamName, groupName, messageID string) error {
-	// XACK command removes the message from the PEL of the consumer group.
-	acknowledged, err := client.XAck(ctx, streamName, groupName, messageID).Result()
-	if err != nil {
-		return fmt.Errorf("error acknowledging message: %w", err)
-	}
-
-	if acknowledged == 0 {
-		return fmt.Errorf("no message was acknowledged, possibly already acknowledged or does not exist")
-	}
-
-	fmt.Printf("Message %s acknowledged successfully in stream %s, group %s\n", messageID, streamName, groupName)
-	return nil
-}
-
 // PublishStatus publishes webhook status updates to the Redis stream.
 func PublishStatus(ctx context.Context, webhookID, status, deliveryError string, client *redis.Client) error {
 	message := WebhookDeliveryStatus{
@@ -226,13 +204,4 @@ func PublishStatus(ctx context.Context, webhookID, status, deliveryError string,
 	return addMessageToStream(ctx, client, streamName, message)
 }
 
-// createConsumerGroup creates a consumer group for a given stream.
-func createConsumerGroup(ctx context.Context, client *redis.Client, streamName, groupName, startID string) error {
-	err := client.XGroupCreateMkStream(ctx, streamName, groupName, startID).Err()
-	if err != nil {
-		if err.Error() != "BUSYGROUP Consumer Group name already exists" {
-			return fmt.Errorf("error creating consumer group: %w", err)
-		}
-	}
-	return nil
-}
+// Implement additional functions as needed.

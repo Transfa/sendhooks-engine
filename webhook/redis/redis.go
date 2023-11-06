@@ -1,7 +1,7 @@
 package redis
 
 /*
-This redis package provides utilities for subscribing and processing messages from a Redis Pub/Sub channel.
+This redis package provides utilities for subscribing and processing messages from a Redis stream.
 
 It defines the structure for webhook payloads, offers mechanisms for subscribing to a Redis channel,
 and handles message processing.
@@ -104,9 +104,8 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 		if err == redis.Nil {
 			// No new messages, sleep for a bit and try again
 			time.Sleep(time.Second)
-			// If you want to continue trying, you can loop or use recursion
-			// For a single batch read, you should return here
-			return nil, nil
+
+			return readMessagesFromStream(ctx, client, streamName)
 		}
 		return nil, err
 	}
@@ -203,5 +202,3 @@ func PublishStatus(ctx context.Context, webhookID, status, deliveryError string,
 	streamName := getRedisPubStreamName()
 	return addMessageToStream(ctx, client, streamName, message)
 }
-
-// Implement additional functions as needed.

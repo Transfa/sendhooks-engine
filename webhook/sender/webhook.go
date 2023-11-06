@@ -6,7 +6,7 @@ import (
 	"webhook/logging"
 )
 
-// SendWebhook sends a JSON POST request to the specified URL and updates the event status in the database
+// SendWebhook sends a JSON POST request to the specified URL
 func SendWebhook(data interface{}, url string, webhookId string, secretHash string) error {
 	jsonBytes, err := marshalJSON(data)
 	if err != nil {

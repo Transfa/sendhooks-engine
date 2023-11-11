@@ -12,6 +12,7 @@ import (
 
 	"webhook/logging"
 	"webhook/queue"
+
 	redisClient "webhook/redis"
 	redisWebhookStatusClient "webhook/redis_status"
 	redis_tls_config "webhook/utils"
@@ -19,19 +20,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-var config Configuration
-
-type Configuration struct {
-	RedisAddress           string `json:"redis_address"`
-	RedisPassword          string `json:"redis_password"`
-	RedisDb                string `json:"redis_db"`
-	RedisSsl               string `json:"redis_ssl"`
-	RedisCaCert            string `json:"redis_ca_cert"`
-	RedisClientCert        string `json:"redis_client_cert"`
-	RedisClientKey         string `json:"redis_client_key"`
-	RedisChannelName       string `json:"redis_channel_name"`
-	RedisStatusChannelName string `json:"redis_status_channel_name"`
-}
+var config redisClient.Configuration
 
 func LoadConfiguration(filename string) error {
 
@@ -77,13 +66,13 @@ func main() {
 	// Create a channel to act as the queue
 	webhookQueue := make(chan redisClient.WebhookPayload, 100) // Buffer size 100
 
-	go queue.ProcessWebhooks(ctx, webhookQueue, client)
+	go queue.ProcessWebhooks(ctx, webhookQueue, client, config)
 
 	// Subscribe to the "transactions" channel
-	err = redisClient.Subscribe(ctx, client, webhookQueue)
+	err = redisClient.Subscribe(ctx, client, webhookQueue, config)
 
 	// Subscribe to the "webhook status updates" channel
-	err = redisWebhookStatusClient.Subscribe(ctx, client)
+	err = redisWebhookStatusClient.Subscribe(ctx, client, config)
 
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))

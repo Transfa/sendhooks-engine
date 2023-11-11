@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"webhook/logging"
 
 	"github.com/go-redis/redis/v8"
@@ -35,10 +34,22 @@ type WebhookPayload struct {
 	SecretHash string                 `json:"secretHash"`
 }
 
+type Configuration struct {
+	RedisAddress           string `json:"redis_address"`
+	RedisPassword          string `json:"redis_password"`
+	RedisDb                string `json:"redis_db"`
+	RedisSsl               string `json:"redis_ssl"`
+	RedisCaCert            string `json:"redis_ca_cert"`
+	RedisClientCert        string `json:"redis_client_cert"`
+	RedisClientKey         string `json:"redis_client_key"`
+	RedisChannelName       string `json:"redis_channel_name"`
+	RedisStatusChannelName string `json:"redis_status_channel_name"`
+}
+
 // Subscribe initializes a subscription to a Redis channel and continuously listens for messages.
 // It decodes these messages into WebhookPayload and sends them to a provided channel.
-func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
-	channelName := getRedisChannelName()
+func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, config Configuration, startedChan ...chan bool) error {
+	channelName := getRedisChannelName(config)
 
 	pubSub := client.Subscribe(ctx, channelName)
 	defer closePubSub(pubSub)
@@ -62,8 +73,8 @@ func Subscribe(ctx context.Context, client *redis.Client, webhookQueue chan<- We
 
 // getRedisChannelName fetches the Redis channel name from an environment variable.
 // It defaults to "hooks" if not set.
-func getRedisChannelName() string {
-	channel := os.Getenv("REDIS_CHANNEL_NAME")
+func getRedisChannelName(configuration Configuration) string {
+	channel := configuration.RedisChannelName
 	if channel == "" {
 		channel = "hooks"
 	}

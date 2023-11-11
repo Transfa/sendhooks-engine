@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"os"
 	"webhook/logging"
+	redisClientCustomized "webhook/redis"
 )
 
 type WebhookDeliveryStatus struct {
@@ -17,8 +17,8 @@ type WebhookDeliveryStatus struct {
 
 // Subscribe initializes a subscription to a Redis channel and continuously listens for messages.
 // It decodes these messages into WebhookDeliveryStatus and sends them to a provided channel.
-func Subscribe(ctx context.Context, client *redis.Client, startedChan ...chan bool) error {
-	channelName := getRedisChannelName()
+func Subscribe(ctx context.Context, client *redis.Client, config redisClientCustomized.Configuration, startedChan ...chan bool) error {
+	channelName := getRedisChannelName(config)
 
 	pubSub := client.Subscribe(ctx, channelName)
 	defer closePubSub(pubSub)
@@ -39,7 +39,7 @@ func Subscribe(ctx context.Context, client *redis.Client, startedChan ...chan bo
 				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error decoding message: %s", err))
 				continue
 			}
-			err = PublishStatus(status.WebhookID, status.Status, status.DeliveryError, client)
+			err = PublishStatus(status.WebhookID, status.Status, status.DeliveryError, client, config)
 			if err != nil {
 				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error publishing status: %s", err))
 			}
@@ -58,8 +58,8 @@ func closePubSub(pubSub *redis.PubSub) {
 
 // getRedisChannelName fetches the Redis channel name from an environment variable.
 // It defaults to "hooks" if not set.
-func getRedisChannelName() string {
-	channel := os.Getenv("REDIS_STATUS_CHANNEL_NAME")
+func getRedisChannelName(configuration redisClientCustomized.Configuration) string {
+	channel := configuration.RedisStatusChannelName
 	if channel == "" {
 		channel = "webhook-status-updates"
 	}
@@ -67,7 +67,7 @@ func getRedisChannelName() string {
 }
 
 // PublishStatus This function publishes webhook status updates to the Redis channel.
-func PublishStatus(webhookID, status, deliveryError string, client *redis.Client) error {
+func PublishStatus(webhookID, status, deliveryError string, client *redis.Client, config redisClientCustomized.Configuration) error {
 	message := WebhookDeliveryStatus{
 		WebhookID:     webhookID,
 		Status:        status,
@@ -79,6 +79,6 @@ func PublishStatus(webhookID, status, deliveryError string, client *redis.Client
 		return err
 	}
 
-	channelName := getRedisChannelName()
+	channelName := getRedisChannelName(config)
 	return client.Publish(context.Background(), channelName, messageJSON).Err()
 }

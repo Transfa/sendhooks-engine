@@ -1,9 +1,9 @@
 package redis
 
 /*
-This redis package provides utilities for subscribing and processing messages from a Redis Pub/Sub channel.
+This redis package provides utilities for subscribing and processing messages from a Redis stream.
 
-It defines the structure for webhook payloads, offers mechanisms for subscribing to a Redis channel,
+It defines the structure for webhook payloads, offers mechanisms for subscribing to a Redis stream,
 and handles message processing.
 
 - Graceful shutdowns and context propagation: Ensures the infinite message listening loop can be halted
@@ -12,7 +12,7 @@ and handles message processing.
 - Error handling and logging: Ensures that transient errors don't halt the entire message processing
   pipeline and provides insights into potential issues via logging.
 
-- Configurability: Allows specifying the Redis channel name via environment variables such as REDIS_CHANNEL_NAME.
+- Configurability: Allows specifying the Redis channel name via environment variables such as REDIS_STREAM_NAME.
 */
 
 import (

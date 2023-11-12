@@ -10,7 +10,7 @@ r = redis.Redis(host='redis', port=6379, db=0)
 def send_data():
     payload = request.json
     # Use xadd to add the message to the Redis Stream named 'hooks'
-    r.xadd('hooks', json.dumps(payload))
+    r.xadd('hooks', {'data': json.dumps(payload)})
     return jsonify({"status": "sent to stream"})
 
 

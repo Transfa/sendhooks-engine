@@ -45,6 +45,8 @@ type WebhookDeliveryStatus struct {
 	Delivered     string `json:"delivered"`
 }
 
+var lastID = "0" // Start reading from the beginning of the stream
+
 // SubscribeToStream initializes a subscription to a Redis stream and continuously listens for messages.
 func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
 	streamName := getRedisSubStreamName()
@@ -92,7 +94,6 @@ func processStreamMessages(ctx context.Context, client *redis.Client, streamName
 
 // readMessagesFromStream reads messages from a Redis stream and returns them.
 func readMessagesFromStream(ctx context.Context, client *redis.Client, streamName string) ([]WebhookPayload, error) {
-	lastID := "0" // Start reading from the beginning of the stream
 
 	entries, err := client.XRead(ctx, &redis.XReadArgs{
 		Streams: []string{streamName, lastID},
@@ -118,11 +119,15 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 		if data, ok := entry.Values["data"].(string); ok {
 			if err := json.Unmarshal([]byte(data), &payload); err != nil {
 				logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error unmarshalling message data: %w", err))
+				lastID = entry.ID
+
 				return nil, err
 
 			}
 		} else {
 			logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error: expected string for 'data' field but got %T", entry.Values["data"]))
+			lastID = entry.ID
+
 			return nil, err
 
 		}
@@ -192,11 +197,14 @@ func (wds WebhookDeliveryStatus) toMap() (map[string]interface{}, error) {
 }
 
 // PublishStatus publishes webhook status updates to the Redis stream.
-func PublishStatus(ctx context.Context, webhookID, status, deliveryError string, client *redis.Client) error {
+func PublishStatus(ctx context.Context, webhookID, url string, created string, delivered string, status, deliveryError string, client *redis.Client) error {
 	message := WebhookDeliveryStatus{
 		WebhookID:     webhookID,
 		Status:        status,
 		DeliveryError: deliveryError,
+		URL:           url,
+		Created:       created,
+		Delivered:     delivered,
 	}
 
 	streamName := getRedisPubStreamName()

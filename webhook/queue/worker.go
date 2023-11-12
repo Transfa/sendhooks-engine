@@ -87,5 +87,10 @@ func retryWithExponentialBackoff(context context.Context, payload redisClient.We
 		return requestError
 	}
 
+	err := redisClient.PublishStatus(context, payload.WebhookID, "success", "", client)
+	if err != nil {
+		logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update: WebhookID : %s ", payload.WebhookID))
+	}
+
 	return nil
 }

@@ -34,7 +34,7 @@ func main() {
 
 	go queue.ProcessWebhooks(ctx, webhookQueue, client)
 
-	// Subscribe to the "transactions" channel
+	// Subscribe to the "hooks" Redis stream
 	err = redisClient.SubscribeToStream(ctx, client, webhookQueue)
 
 	if err != nil {

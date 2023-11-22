@@ -9,10 +9,10 @@ services:
 
   webhook-sender:
     build: ../webhook
-    environment:
-      REDIS_ADDRESS: redis:6379
     depends_on:
       - redis
+    volumes:
+      - ./config.json:/app/config.json # Mounts config.json from host to container
 
   flask-api:
     build: ./api/

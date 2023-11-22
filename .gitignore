@@ -25,3 +25,6 @@ Godeps/
 
 #  binary files
 webhook/webhook
+
+# sendhooks settings
+config.json

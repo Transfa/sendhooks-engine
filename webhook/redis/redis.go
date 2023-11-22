@@ -12,7 +12,7 @@ and handles message processing.
 - Error handling and logging: Ensures that transient errors don't halt the entire message processing
   pipeline and provides insights into potential issues via logging.
 
-- Configurability: Allows specifying the Redis channel name via environment variables such as REDIS_STREAM_NAME.
+- Configurability: Allows specifying the Redis stream name via the config.json file with the `redisStreamName` key.
 */
 
 import (
@@ -96,7 +96,7 @@ func processStreamMessages(ctx context.Context, client *redis.Client, streamName
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped webhook due to channel overflow. Webhook ID: %s", payload.WebhookID))
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped webhook due to channel Golang overflow. Webhook ID: %s", payload.WebhookID))
 		}
 	}
 
@@ -159,21 +159,21 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 // getRedisSubStreamName fetches the Redis stream name from an environment variable.
 func getRedisSubStreamName(configuration Configuration) string {
 
-	channel := configuration.RedisStreamName
-	if channel == "" {
-		channel = "hooks"
+	streamName := configuration.RedisStreamName
+	if streamName == "" {
+		streamName = "hooks"
 	}
-	return channel
+	return streamName
 }
 
 // getRedisPubStreamName fetches the Redis stream name from an environment variable.
 func getRedisPubStreamName(configuration Configuration) string {
 
-	channel := configuration.RedisStreamStatusName
-	if channel == "" {
-		channel = "webhook-status-updates"
+	streamStatusName := configuration.RedisStreamStatusName
+	if streamStatusName == "" {
+		streamStatusName = "webhook-status-updates"
 	}
-	return channel
+	return streamStatusName
 }
 
 // addMessageToStream adds a message to a Redis stream.

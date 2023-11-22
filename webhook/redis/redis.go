@@ -110,7 +110,6 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 	entries, err := client.XRead(ctx, &redis.XReadArgs{
 		Streams: []string{streamName, lastID},
 		Count:   5,
-		Block:   0,
 	}).Result()
 
 	if err != nil {

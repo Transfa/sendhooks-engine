@@ -35,6 +35,19 @@ type WebhookPayload struct {
 	SecretHash string                 `json:"secretHash"`
 }
 
+type Configuration struct {
+	RedisAddress           string `json:"redis_address"`
+	RedisPassword          string `json:"redis_password"`
+	RedisDb                string `json:"redis_db"`
+	RedisSsl               string `json:"redis_ssl"`
+	RedisCaCert            string `json:"redis_ca_cert"`
+	RedisClientCert        string `json:"redis_client_cert"`
+	RedisClientKey         string `json:"redis_client_key"`
+	RedisChannelName       string `json:"redis_channel_name"`
+	RedisStatusChannelName string `json:"redis_status_channel_name"`
+}
+
+
 // WebhookDeliveryStatus represents the delivery status of a webhook.
 type WebhookDeliveryStatus struct {
 	WebhookID     string `json:"webhook_id"`
@@ -48,7 +61,7 @@ type WebhookDeliveryStatus struct {
 var lastID = "0" // Start reading from the beginning of the stream
 
 // SubscribeToStream initializes a subscription to a Redis stream and continuously listens for messages.
-func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, startedChan ...chan bool) error {
+func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, config Configuration, startedChan ...chan bool) error {
 	streamName := getRedisSubStreamName()
 
 	for {
@@ -146,9 +159,9 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 }
 
 // getRedisSubStreamName fetches the Redis stream name from an environment variable.
-func getRedisSubStreamName() string {
+func getRedisSubStreamName(configuration Configuration) string {
 
-	channel := os.Getenv("REDIS_STREAM_NAME")
+	channel := configuration.RedisStreamName
 	if channel == "" {
 		channel = "hooks"
 	}
@@ -156,9 +169,9 @@ func getRedisSubStreamName() string {
 }
 
 // getRedisPubStreamName fetches the Redis stream name from an environment variable.
-func getRedisPubStreamName() string {
+func getRedisPubStreamName(configuration Configuration) string {
 
-	channel := os.Getenv("REDIS_STATUS_CHANNEL_NAME")
+	channel := configuration.RedisStreamStatusName
 	if channel == "" {
 		channel = "webhook-status-updates"
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -11,18 +12,50 @@ import (
 
 	"webhook/logging"
 	"webhook/queue"
+
 	redisClient "webhook/redis"
 	redis_tls_config "webhook/utils"
 
 	"github.com/go-redis/redis/v8"
 )
 
+var config redisClient.Configuration
+
+func LoadConfiguration(filename string) error {
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
+	// Load configuration file
+	err := LoadConfiguration("config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Create a context
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
+	err = logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
+	if err != nil {
+		log.Fatalf("Failed to log webhook event: %v", err)
+	}
 
 	client, err := createRedisClient()
 	if err != nil {
@@ -32,10 +65,10 @@ func main() {
 	// Create a channel to act as the queue
 	webhookQueue := make(chan redisClient.WebhookPayload, 100) // Buffer size 100
 
-	go queue.ProcessWebhooks(ctx, webhookQueue, client)
+	go queue.ProcessWebhooks(ctx, webhookQueue, client, config)
 
 	// Subscribe to the "hooks" Redis stream
-	err = redisClient.SubscribeToStream(ctx, client, webhookQueue)
+	err = redisClient.SubscribeToStream(ctx, client, webhookQueue, config)
 
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))
@@ -47,28 +80,28 @@ func main() {
 }
 
 func createRedisClient() (*redis.Client, error) {
-	redisAddress := os.Getenv("REDIS_ADDRESS")
+	redisAddress := config.RedisAddress
 	if redisAddress == "" {
 		redisAddress = "localhost:6379" // Default address
 	}
 
-	redisDB := os.Getenv("REDIS_DB")
+	redisDB := config.RedisDb
 	if redisDB == "" {
 		redisDB = "0" // Default database
 	}
 
 	redisDBInt, _ := strconv.Atoi(redisDB)
 
-	redisPassword := os.Getenv("REDIS_PASSWORD")
+	redisPassword := config.RedisPassword
 
 	// SSL/TLS configuration
-	useSSL := strings.ToLower(os.Getenv("REDIS_SSL")) == "true"
+	useSSL := strings.ToLower(config.RedisSsl) == "true"
 	var tlsConfig *tls.Config
 
 	if useSSL {
-		caCertPath := os.Getenv("REDIS_CA_CERT")
-		clientCertPath := os.Getenv("REDIS_CLIENT_CERT")
-		clientKeyPath := os.Getenv("REDIS_CLIENT_KEY")
+		caCertPath := config.RedisCaCert
+		clientCertPath := config.RedisClientCert
+		clientKeyPath := config.RedisClientKey
 
 		var err error
 		tlsConfig, err = redis_tls_config.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)

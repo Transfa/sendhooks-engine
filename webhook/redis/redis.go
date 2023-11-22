@@ -12,7 +12,7 @@ and handles message processing.
 - Error handling and logging: Ensures that transient errors don't halt the entire message processing
   pipeline and provides insights into potential issues via logging.
 
-- Configurability: Allows specifying the Redis stream name via the config.json file with the `redisStreamName` key.
+- Configurability: Allows specifying the Redis stream name via the config-example.json file with the `redisStreamName` key.
 */
 
 import (

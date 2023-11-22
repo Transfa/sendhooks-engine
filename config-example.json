@@ -1,0 +1,11 @@
+{
+  "redisAddress": "127.0.0.1:6379",
+  "redisPassword": "your_password_here",
+  "redisDb": "0",
+  "redisSsl": "false",
+  "redisCaCert": "/path/to/ca_cert.pem",
+  "redisClientCert": "/path/to/client_cert.pem",
+  "redisClientKey": "/path/to/client_key.pem",
+  "redisStreamName": "example_stream",
+  "redisStreamStatusName": "status_stream"
+}

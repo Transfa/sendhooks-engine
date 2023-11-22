@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 	"webhook/logging"
 
@@ -36,17 +35,16 @@ type WebhookPayload struct {
 }
 
 type Configuration struct {
-	RedisAddress           string `json:"redis_address"`
-	RedisPassword          string `json:"redis_password"`
-	RedisDb                string `json:"redis_db"`
-	RedisSsl               string `json:"redis_ssl"`
-	RedisCaCert            string `json:"redis_ca_cert"`
-	RedisClientCert        string `json:"redis_client_cert"`
-	RedisClientKey         string `json:"redis_client_key"`
-	RedisChannelName       string `json:"redis_channel_name"`
-	RedisStatusChannelName string `json:"redis_status_channel_name"`
+	RedisAddress          string `json:"redisAddress"`
+	RedisPassword         string `json:"redisPassword"`
+	RedisDb               string `json:"redisDb"`
+	RedisSsl              string `json:"redisSsl"`
+	RedisCaCert           string `json:"redisCaCert"`
+	RedisClientCert       string `json:"redisClientCert"`
+	RedisClientKey        string `json:"redisClientKey"`
+	RedisStreamName       string `json:"redisStreamName"`
+	RedisStreamStatusName string `json:"redisStreamStatusName"`
 }
-
 
 // WebhookDeliveryStatus represents the delivery status of a webhook.
 type WebhookDeliveryStatus struct {
@@ -62,7 +60,7 @@ var lastID = "0" // Start reading from the beginning of the stream
 
 // SubscribeToStream initializes a subscription to a Redis stream and continuously listens for messages.
 func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, config Configuration, startedChan ...chan bool) error {
-	streamName := getRedisSubStreamName()
+	streamName := getRedisSubStreamName(config)
 
 	for {
 		if len(startedChan) > 0 {
@@ -210,7 +208,7 @@ func (wds WebhookDeliveryStatus) toMap() (map[string]interface{}, error) {
 }
 
 // PublishStatus publishes webhook status updates to the Redis stream.
-func PublishStatus(ctx context.Context, webhookID, url string, created string, delivered string, status, deliveryError string, client *redis.Client) error {
+func PublishStatus(ctx context.Context, webhookID, url string, created string, delivered string, status, deliveryError string, client *redis.Client, config Configuration) error {
 	message := WebhookDeliveryStatus{
 		WebhookID:     webhookID,
 		Status:        status,
@@ -220,6 +218,6 @@ func PublishStatus(ctx context.Context, webhookID, url string, created string, d
 		Delivered:     delivered,
 	}
 
-	streamName := getRedisPubStreamName()
+	streamName := getRedisPubStreamName(config)
 	return addMessageToStream(ctx, client, streamName, message)
 }

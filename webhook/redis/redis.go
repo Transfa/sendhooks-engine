@@ -61,7 +61,7 @@ var lastID = "0" // Start reading from the beginning of the stream
 
 // SubscribeToStream initializes a subscription to a Redis stream and continuously listens for messages.
 func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, config Configuration, startedChan ...chan bool) error {
-	streamName := getRedisSubStreamName(config)
+	streamName := getRedisStreamName(config)
 
 	for {
 		if len(startedChan) > 0 {
@@ -156,8 +156,8 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 	return messages, nil
 }
 
-// getRedisSubStreamName fetches the Redis stream name from an environment variable.
-func getRedisSubStreamName(configuration Configuration) string {
+// getRedisStreamName fetches the Redis stream name from an environment variable.
+func getRedisStreamName(configuration Configuration) string {
 
 	streamName := configuration.RedisStreamName
 	if streamName == "" {
@@ -166,8 +166,8 @@ func getRedisSubStreamName(configuration Configuration) string {
 	return streamName
 }
 
-// getRedisPubStreamName fetches the Redis stream name from an environment variable.
-func getRedisPubStreamName(configuration Configuration) string {
+// getRedisStreamStatusName fetches the Redis stream name from an environment variable.
+func getRedisStreamStatusName(configuration Configuration) string {
 
 	streamStatusName := configuration.RedisStreamStatusName
 	if streamStatusName == "" {
@@ -218,6 +218,6 @@ func PublishStatus(ctx context.Context, webhookID, url string, created string, d
 		Delivered:     delivered,
 	}
 
-	streamName := getRedisPubStreamName(config)
+	streamName := getRedisStreamStatusName(config)
 	return addMessageToStream(ctx, client, streamName, message)
 }

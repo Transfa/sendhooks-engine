@@ -20,7 +20,7 @@ import (
 )
 
 // Declare a variable 'config' of type 'redisClient.Configuration'.
-var config redisClient.Configuration
+var Config redisClient.Configuration
 
 // LoadConfiguration is a function that takes a filename as a string and returns an error.
 // It's used to load and parse a configuration file for the Redis client.
@@ -44,7 +44,7 @@ func LoadConfiguration(filename string) error {
 	decoder := json.NewDecoder(file)
 	// Use the decoder to decode the JSON content into the 'config' variable.
 	// If an error occurs during decoding (e.g., JSON format issue), return the error.
-	err = decoder.Decode(&config)
+	err = decoder.Decode(&Config)
 	if err != nil {
 		return err
 	}
@@ -75,10 +75,10 @@ func main() {
 	// Create a channel to act as the queue
 	webhookQueue := make(chan redisClient.WebhookPayload, 100) // Buffer size 100
 
-	go queue.ProcessWebhooks(ctx, webhookQueue, client, config)
+	go queue.ProcessWebhooks(ctx, webhookQueue, client, Config)
 
 	// Subscribe to the "hooks" Redis stream
-	err = redisClient.SubscribeToStream(ctx, client, webhookQueue, config)
+	err = redisClient.SubscribeToStream(ctx, client, webhookQueue, Config)
 
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error initializing connection: %s", err))
@@ -90,28 +90,28 @@ func main() {
 }
 
 func createRedisClient() (*redis.Client, error) {
-	redisAddress := config.RedisAddress
+	redisAddress := Config.RedisAddress
 	if redisAddress == "" {
 		redisAddress = "localhost:6379" // Default address
 	}
 
-	redisDB := config.RedisDb
+	redisDB := Config.RedisDb
 	if redisDB == "" {
 		redisDB = "0" // Default database
 	}
 
 	redisDBInt, _ := strconv.Atoi(redisDB)
 
-	redisPassword := config.RedisPassword
+	redisPassword := Config.RedisPassword
 
 	// SSL/TLS configuration
-	useSSL := strings.ToLower(config.RedisSsl) == "true"
+	useSSL := strings.ToLower(Config.RedisSsl) == "true"
 	var tlsConfig *tls.Config
 
 	if useSSL {
-		caCertPath := config.RedisCaCert
-		clientCertPath := config.RedisClientCert
-		clientKeyPath := config.RedisClientKey
+		caCertPath := Config.RedisCaCert
+		clientCertPath := Config.RedisClientCert
+		clientKeyPath := Config.RedisClientKey
 
 		var err error
 		tlsConfig, err = redis_tls_config.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)

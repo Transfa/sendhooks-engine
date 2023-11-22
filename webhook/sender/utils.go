@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"webhook/logging"
+	redisClient "webhook/redis"
 )
 
 type HTTPDoer interface {
@@ -25,7 +25,7 @@ var marshalJSON = func(data interface{}) ([]byte, error) {
 	return jsonBytes, nil
 }
 
-var prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*http.Request, error) {
+var prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration redisClient.Configuration) (*http.Request, error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error during the webhook request preparation"))
@@ -34,7 +34,7 @@ var prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*htt
 
 	req.Header.Set("Content-Type", "application/json")
 
-	secretHashHeaderName := os.Getenv("SECRET_HASH_HEADER_NAME")
+	secretHashHeaderName := configuration.SecretHashHeaderName
 	if secretHashHeaderName == "" {
 		secretHashHeaderName = "X-Secret-Hash"
 	}

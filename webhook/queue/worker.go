@@ -62,7 +62,7 @@ func retryWithExponentialBackoff(context context.Context, payload redisClient.We
 	created := time.Now().String()
 
 	for retries < maxRetries {
-		err := sender.SendWebhook(payload.Data, payload.URL, payload.WebhookID, payload.SecretHash)
+		err := sender.SendWebhook(payload.Data, payload.URL, payload.WebhookID, payload.SecretHash, configuration)
 
 		if err == nil {
 			if err != nil {

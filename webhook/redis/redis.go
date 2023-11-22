@@ -45,6 +45,7 @@ type Configuration struct {
 	RedisClientKey        string `json:"redisClientKey"`
 	RedisStreamName       string `json:"redisStreamName"`
 	RedisStreamStatusName string `json:"redisStreamStatusName"`
+	SecretHashHeaderName  string `json:"secretHashHeaderName"`
 }
 
 // WebhookDeliveryStatus represents the delivery status of a webhook.

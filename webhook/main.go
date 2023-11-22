@@ -57,7 +57,7 @@ func main() {
 	// Load configuration file
 	err := LoadConfiguration("config.json")
 	if err != nil {
-		log.Printf("no config-example.json found: %v. using default configuration to the project\n", err)
+		log.Printf("%v. anyway, using default configuration to the project\n", err)
 	}
 	// Create a context
 	ctx, cancel := context.WithCancel(context.Background())

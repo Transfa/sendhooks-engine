@@ -12,7 +12,7 @@ services:
     depends_on:
       - redis
     volumes:
-      - ./config.json:/app/config.json # Mounts config.json from host to container
+      - ./config.json:/root/config.json # Mounts config.json from host to container
 
   flask-api:
     build: ./api/

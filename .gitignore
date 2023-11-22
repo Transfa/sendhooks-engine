@@ -21,6 +21,10 @@ Godeps/
 # IDE and editor files
 .vscode/
 .idea/
+.fleet/
 
 #  binary files
 webhook/webhook
+
+# sendhooks settings
+config.json

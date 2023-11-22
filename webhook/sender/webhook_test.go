@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 	"webhook/logging"
+	"webhook/redis"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +27,7 @@ func TestSendWebhook(t *testing.T) {
 	t.Run("Successful webhook sending", func(t *testing.T) {
 		resetMocks() // Reset all mocks to original functions
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
 
 		assert.NoError(t, err)
 	})
@@ -37,18 +38,18 @@ func TestSendWebhook(t *testing.T) {
 			return nil, errors.New("marshaling error")
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
 
 		assert.EqualError(t, err, "marshaling error")
 	})
 
 	t.Run("Failed webhook due to request preparation errors", func(t *testing.T) {
 		resetMocks()
-		prepareRequest = func(url string, jsonBytes []byte, secretHash string) (*http.Request, error) {
+		prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration redis.Configuration) (*http.Request, error) {
 			return nil, errors.New("request preparation error")
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
 
 		assert.EqualError(t, err, "request preparation error")
 	})
@@ -59,7 +60,7 @@ func TestSendWebhook(t *testing.T) {
 			return "failed", nil, errors.New("response processing error")
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
 
 		assert.EqualError(t, err, "response processing error")
 	})
@@ -70,7 +71,7 @@ func TestSendWebhook(t *testing.T) {
 			return "failed", []byte("error body"), nil
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash")
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
 		if !webhookLoggerInvoked {
 			assert.Fail(t, "Expected WebhookLogger to be invoked")
 		}

@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"webhook/redis"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -43,7 +44,7 @@ func TestPrepareRequest(t *testing.T) {
 	jsonBytes := []byte(`{"key":"value"}`)
 	secretHash := "secret123"
 
-	req, err := prepareRequest(url, jsonBytes, secretHash)
+	req, err := prepareRequest(url, jsonBytes, secretHash, redis.Configuration{})
 
 	assert.NoError(t, err)
 
@@ -64,9 +65,9 @@ func TestSendRequest(t *testing.T) {
 
 	req, _ := http.NewRequest("GET", "http://example.com", nil)
 	resp, err := sendRequest(req)
-	
+
 	assert.NoError(t, err)
-	
+
 	body, _ := io.ReadAll(resp.Body)
 
 	assert.Equal(t, 200, resp.StatusCode)

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Using JSON for configuration instead of environment variables (#44)
+- Migrate to Redis streams (#45)
+
 ### Fixed
 
 ## [0.0.2] - 2023-10-31

@@ -4,22 +4,24 @@ import (
 	"errors"
 	"fmt"
 	"webhook/logging"
+	redisClient "webhook/redis"
 )
 
-// SendWebhook sends a JSON POST request to the specified URL and updates the event status in the database
-func SendWebhook(data interface{}, url string, webhookId string, secretHash string) error {
+// SendWebhook sends a JSON POST request to the specified URL
+func SendWebhook(data interface{}, url string, webhookId string, secretHash string, configuration redisClient.Configuration) error {
 	jsonBytes, err := marshalJSON(data)
 	if err != nil {
 		return err
 	}
 
-	req, err := prepareRequest(url, jsonBytes, secretHash)
+	req, err := prepareRequest(url, jsonBytes, secretHash, configuration)
 	if err != nil {
 		return err
 	}
 
 	resp, err := sendRequest(req)
 	if err != nil {
+
 		return err
 	}
 

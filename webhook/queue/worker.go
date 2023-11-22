@@ -27,17 +27,17 @@ const (
 	maxBackoff     time.Duration = time.Hour
 )
 
-func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookPayload, client *redis.Client) {
+func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookPayload, client *redis.Client, configuration redisClient.Configuration) {
 
 	for payload := range webhookQueue {
-		go sendWebhookWithRetries(payload, client)
+		go sendWebhookWithRetries(payload, client, configuration)
 	}
 }
 
-func sendWebhookWithRetries(payload redisClient.WebhookPayload, client *redis.Client) {
-	if err := retryWithExponentialBackoff(payload, client); err != nil {
+func sendWebhookWithRetries(payload redisClient.WebhookPayload, client *redis.Client, configuration redisClient.Configuration) {
+	if err := retryWithExponentialBackoff(payload, client, configuration); err != nil {
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send webhook after maximum retries. WebhookID : %s", payload.WebhookId))
-		err := redis_status.PublishStatus(payload.WebhookId, "failed", err.Error(), client)
+		err := redis_status.PublishStatus(payload.WebhookId, "failed", err.Error(), client, configuration)
 		if err != nil {
 			logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update: WebhookID : %s ", payload.WebhookId))
 		}
@@ -55,7 +55,7 @@ func calculateBackoff(currentBackoff time.Duration) time.Duration {
 	return nextBackoff
 }
 
-func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *redis.Client) error {
+func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *redis.Client, configuration redisClient.Configuration) error {
 	retries := 0
 	backoffTime := initialBackoff
 	var requestError error
@@ -64,7 +64,7 @@ func retryWithExponentialBackoff(payload redisClient.WebhookPayload, client *red
 		err := sender.SendWebhook(payload.Data, payload.Url, payload.WebhookId, payload.SecretHash)
 
 		if err == nil {
-			err := redis_status.PublishStatus(payload.WebhookId, "success", "", client)
+			err := redis_status.PublishStatus(payload.WebhookId, "success", "", client, configuration)
 			if err != nil {
 				logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update WebhookID : %s ", payload.WebhookId))
 			}

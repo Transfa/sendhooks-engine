@@ -34,6 +34,7 @@ type WebhookPayload struct {
 	SecretHash string                 `json:"secretHash"`
 }
 
+// Configuration is a struct that holds various settings for a Redis client connection.
 type Configuration struct {
 	RedisAddress          string `json:"redisAddress"`
 	RedisPassword         string `json:"redisPassword"`

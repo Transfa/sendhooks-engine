@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { HookModel } from "../models/hookModel";
+import { appLog } from "../share/app-log";
 
 export class HookController {
   static async findAll(_: Request, res: Response) {
@@ -7,7 +8,7 @@ export class HookController {
       const hooks = await HookModel.find();
       return res.json(hooks);
     } catch (error) {
-      console.error("Error fetching hooks:", error);
+      appLog.error("Error fetching hooks:", error);
       return res
         .status(500)
         .json({ code: "SERVER_ERROR", description: "Internal Server Error" });
@@ -26,7 +27,7 @@ export class HookController {
 
       return res.json(hook);
     } catch (error) {
-      console.error("Error fetching hook:", error);
+      appLog.error("Error fetching hook:", error);
 
       return res
         .status(500)

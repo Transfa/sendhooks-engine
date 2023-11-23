@@ -3,6 +3,7 @@ import { connectToMongoDB } from "./src/utils/mongoDB";
 import { startHooksListener } from "./src/services/hooksService";
 import hooksRoutes from "./src/routes/hooksRoutes";
 import { appConfig } from "./src/configuration";
+import { appLog } from "./src/share/app-log";
 
 const app = express();
 
@@ -20,5 +21,5 @@ startHooksListener();
 
 // Start server
 app.listen(appConfig.thisServer.port, () => {
-  console.log(`Server is running on port ${appConfig.thisServer.port}`);
+  appLog.info(`Server is running on port ${appConfig.thisServer.port}`);
 });

@@ -16,12 +16,12 @@ To run SendHooks using Docker, a `config.json` file is required. This file conta
 
 1. **Pull the Docker Image**:
    ```bash
-   docker pull koladev32/sendhooks:latest
+   docker pull transfa/sendhooks:latest
    ```
 
 2. **Run the Docker Image with `config.json`**:
    ```bash
-   docker run -v /path/to/config.json:/app/config.json -t koladev32/sendhooks
+   docker run -v /path/to/config.json:/app/config.json -t transfa/sendhooks
    ```
 Replace `/path/to/config.json` with the path to your configuration file.
 

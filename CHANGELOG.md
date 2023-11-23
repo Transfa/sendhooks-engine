@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Using JSON for configuration instead of environment variables (#44)
+- Configure Automatic Push to Docker Registry using GitHub Actions ([#49]([url](https://github.com/Transfa/sendhooks-engine/issues/49)))
+- Using JSON for configuration instead of environment variables ([#44]([url](https://github.com/Transfa/sendhooks-engine/issues/44)))
 - Migrate to Redis streams (#45)
 
 ### Fixed

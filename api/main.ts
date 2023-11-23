@@ -7,19 +7,18 @@ import { appLog } from "./src/share/app-log";
 
 const app = express();
 
-// Connect to MongoDB
-connectToMongoDB();
+async function main() {
+  await connectToMongoDB();
 
-// Use JSON middleware
-app.use(express.json());
+  app.use(express.json());
 
-// Use hooks routes
-app.use("/sendhooks", hooksRoutes);
+  app.use("/api/sendhooks/v1", hooksRoutes);
 
-// Start Redis stream listener
-startHooksListener();
+  startHooksListener();
 
-// Start server
-app.listen(appConfig.thisServer.port, () => {
-  appLog.info(`Server is running on port ${appConfig.thisServer.port}`);
-});
+  app.listen(appConfig.thisServer.port, () => {
+    appLog.info(`Server is running on port ${appConfig.thisServer.port}`);
+  });
+}
+
+main().catch(appLog.error);

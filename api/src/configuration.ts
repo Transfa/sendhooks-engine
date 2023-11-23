@@ -14,4 +14,5 @@ export const appConfig = {
     host: strVal(process.env.REDIS_HOST),
     port: nbVal(process.env.REDIS_PORT),
   },
+  streamName: strVal(process.env.STREAM_KEY),
 };

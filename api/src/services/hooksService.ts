@@ -3,30 +3,22 @@ import { redisClient } from "../utils/redis";
 import { HookModel } from "../models/hookModel";
 import { strVal, strValOrUndef } from "@paroi/data-formatters-lib";
 import { appLog } from "../share/app-log";
+import { appConfig } from "../configuration";
 
-const streamKey = "hookStream";
+const streamName = appConfig.streamName;
+const groupName = "sendhooks-group";
 
 export const startHooksListener = async () => {
-  await redisClient.xgroup(
-    "CREATECONSUMER",
-    streamKey,
-    "sendhooks-group",
-    "$",
-    function (err) {
-      if (err) appLog.error("Error creating consumer group:", err);
-    }
-  );
-
   await redisClient.xreadgroup(
     "GROUP",
-    "sendhooks-group",
-    "consumer-1",
+    groupName,
+    "hooks-consumer",
     "COUNT",
     0,
     "BLOCK",
     1,
     "STREAMS",
-    streamKey,
+    streamName,
     ">",
     (err, streams) => {
       if (err) {
@@ -46,6 +38,15 @@ export const startHooksListener = async () => {
       startHooksListener(); // Continue listening for more messages
     }
   );
+};
+
+export const createRedisConsumerGroup = async (): Promise<void> => {
+  try {
+    await redisClient.xgroup("CREATE", streamName, groupName, "$", "MKSTREAM");
+    appLog.info("Consumer group created successfully.");
+  } catch (error) {
+    appLog.info("Consumer Group name already exists");
+  }
 };
 
 const handleHookCreation = async (id: string, hookData: any): Promise<void> => {

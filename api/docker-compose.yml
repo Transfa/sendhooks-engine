@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:latest
+    hostname: redis
+    networks: 
+      - sendhooks
+    ports:
+      - "6379:6379" # this makes the service available on the localhost via 6379.
+  
+  mongo:
+    image: mongo
+    networks: 
+      - sendhooks
+
+  webhook-sender:
+    build: ../webhook
+    networks: 
+      - sendhooks
+    depends_on:
+      - redis
+    volumes:
+      - ./config.json:/root/config.json # Mounts config.json from host to container
+
+  flask-api:
+    build: ../example-project/api
+    networks: 
+      - sendhooks
+    ports:
+      - "5001:5000" # the default port for accessing from the localhost is 5001. The service inside docker can be accessed from the port 5000.
+    depends_on:
+      - webhook-sender
+  
+  sendhooks-engine-api:
+    image: sendhooks-engine-api
+    networks: 
+      - sendhooks
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/sendhook
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - STREAM_KEY=hooks
+      - PORT=5001
+    ports:
+      - "5002:5001" # the default port for accessing from the localhost is 5001. The service inside docker can be accessed from the port 5000.
+    depends_on:
+      - redis
+      - mongo
+
+networks:
+  sendhooks:

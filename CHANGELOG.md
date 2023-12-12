@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+Send response details in case of webhook failed (#39)
+
 ### Fixed
 
 ## [0.2.0-beta] - 2023-11-23

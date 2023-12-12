@@ -61,11 +61,11 @@ var closeResponse = func(body io.ReadCloser) {
 	}
 }
 
-var processResponse = func(resp *http.Response) (string, []byte, error) {
+var processResponse = func(resp *http.Response) (string, http.Header, []byte, error) {
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error reading response body: %s", err))
-		return "failed", nil, err
+		return "failed", nil, nil, err
 	}
 
 	status := "failed"
@@ -74,8 +74,8 @@ var processResponse = func(resp *http.Response) (string, []byte, error) {
 	}
 
 	if status == "failed" {
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("HTTP request failed with status code: %d, response body: %s", resp.StatusCode, string(respBody)))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("HTTP request failed with status code: %d, response body: %s", resp.StatusCode, string(respBody)))
 	}
 
-	return status, respBody, nil
+	return status, resp.Header, respBody, nil
 }

@@ -25,7 +25,7 @@ git clone https://github.com/koladev32/sendhooks-engine.git && cd sendhooks-engi
 go mod download
 ```
 
-At the moment, we are working with Go 1.2.
+At the moment, we are working with Go 1.20.
 
 ## Submitting Pull Requests
 

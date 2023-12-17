@@ -59,7 +59,8 @@ var WebhookLogger = func(errorType string, message interface{}) error {
 	multi := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(multi)
 
-	logEntry := fmt.Sprintf("%s - %s - %s\n", errorType, currentDateTime(), messageString)
+	// Added two new lines after the log is done
+	logEntry := fmt.Sprintf("%s - %s - %s\n\n", errorType, currentDateTime(), messageString)
 	_, err = log.Writer().Write([]byte(logEntry))
 	return err
 }

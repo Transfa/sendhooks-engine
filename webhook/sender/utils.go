@@ -74,7 +74,7 @@ var processResponse = func(resp *http.Response) (string, []byte, error) {
 	}
 
 	if status == "failed" {
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("HTTP request failed with status code: %d, response body: %s", resp.StatusCode, string(respBody)))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("HTTP request failed with status code: %d, response body: %s", resp.StatusCode, string(respBody)))
 	}
 
 	return status, respBody, nil

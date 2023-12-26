@@ -1,19 +1,18 @@
 # SENDHOOKS-ENGINE-API
 
-## start localy
-
-```sh
-npm i && npm run dev
-```
-
 ## build docker image
 
 ```sh
-# build sendhooks-engine-api image
-docker build -t sendhooks-engine-api .
-
+cp .env.sample .env
+cp config.sample.json config.json
 # run apps
 docker-compose up
+```
+
+## start localy sendhooks-engine-api
+
+```sh
+npm i && npm run dev
 ```
 
 ## test api

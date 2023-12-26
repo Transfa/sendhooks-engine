@@ -1,0 +1,8 @@
+{
+  "redisAddress": "redis:6379",
+  "redisPassword": "",
+  "redisDb": "0",
+  "redisSsl": "false",
+  "redisStreamName": "hooks",
+  "redisStreamStatusName": "hooks-status"
+}

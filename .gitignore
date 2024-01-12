@@ -26,5 +26,13 @@ Godeps/
 #  binary files
 webhook/webhook
 
+# sendhooks api
+node_modules/
+dist/
+*.rdb
+
 # sendhooks settings
 config.json
+
+#sendhooks-engine-api
+api/.env

@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-Send response details in case of webhook failed (#39)
+- Persisting data about the webhooks (#42)
+- Integration of Logrus for Improved Logging (#55)
+- Send response details in case of webhook failed (#39)
 
 ### Fixed
 

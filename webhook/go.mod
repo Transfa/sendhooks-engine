@@ -2,7 +2,10 @@ module webhook
 
 go 1.20
 
-require github.com/go-redis/redis/v8 v8.11.5
+require (
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/sirupsen/logrus v1.9.3
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

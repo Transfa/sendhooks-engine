@@ -28,7 +28,7 @@ export const startHooksListener = async () => {
         const [stream] = streams;
 
         appLog.debug("streamData", JSON.stringify(stream, null, 2));
-        const [streamName, messages] = stream as any;
+        const [messages] = stream as any;
         const [message] = messages;
         const [id, data] = message;
         const hookData = JSON.parse(data[1]);

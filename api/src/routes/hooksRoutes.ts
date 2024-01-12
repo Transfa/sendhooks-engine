@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get("/hooks", HookController.findAll);
 
-router.get("/hooks/:hook_id", HookController.findOne);
+router.get("/hooks/:hookId", HookController.findOne);
 
 export default router;

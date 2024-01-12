@@ -2,15 +2,11 @@ package logging
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"time"
-)
 
-// logging helps with logging in the application. Logs are saved in a daily YYYY-MM-DD.log file format.
-// Two types of log messages are supported: ERROR and WARNING.
-// Each log is formatted as: ERROR_TYPE - YYYY-MM-DD HH:MM:SS - ERROR_STRING
+	"github.com/sirupsen/logrus"
+)
 
 const (
 	ErrorType   = "ERROR"
@@ -29,7 +25,6 @@ func currentDateTime() string {
 }
 
 var WebhookLogger = func(errorType string, message interface{}) error {
-
 	var messageString string
 
 	switch v := message.(type) {
@@ -49,18 +44,28 @@ var WebhookLogger = func(errorType string, message interface{}) error {
 		fmt.Print("Failed to open log file: \n", err)
 		return err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			log.Println("Failed to close file", err)
-		}
-	}(file)
+	defer file.Close()
 
-	multi := io.MultiWriter(os.Stdout, file)
-	log.SetOutput(multi)
+	// Create a new Logrus Logger
+	var logger = logrus.New()
+	logger.SetOutput(file)
+	logger.SetFormatter(&logrus.TextFormatter{})
 
-	// Added two new lines after the log is done
-	logEntry := fmt.Sprintf("%s - %s - %s\n\n", errorType, currentDateTime(), messageString)
-	_, err = log.Writer().Write([]byte(logEntry))
-	return err
+	// Log the entry
+	switch errorType {
+	case ErrorType:
+		logger.WithFields(logrus.Fields{
+			"date": currentDateTime(),
+		}).Error(messageString)
+	case WarningType:
+		logger.WithFields(logrus.Fields{
+			"date": currentDateTime(),
+		}).Warning(messageString)
+	case EventType:
+		logger.WithFields(logrus.Fields{
+			"date": currentDateTime(),
+		}).Info(messageString)
+	}
+
+	return nil
 }

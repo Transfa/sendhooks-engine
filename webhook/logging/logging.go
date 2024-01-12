@@ -14,6 +14,9 @@ const (
 	EventType   = "EVENT"
 )
 
+// Create a new Logrus Logger
+var logger = logrus.New()
+
 // currentDate retrieves the current date in "YYYY-MM-DD" format.
 func currentDate() string {
 	return time.Now().Format("2006-01-02")
@@ -46,8 +49,6 @@ var WebhookLogger = func(errorType string, message interface{}) error {
 	}
 	defer file.Close()
 
-	// Create a new Logrus Logger
-	var logger = logrus.New()
 	logger.SetOutput(file)
 	logger.SetFormatter(&logrus.TextFormatter{})
 

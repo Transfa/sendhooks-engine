@@ -1,0 +1,35 @@
+name: Build and Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Build
+      run: cd webhook && go build -o webhook .
+
+    - name: Test
+      run: cd webhook && go test -v ./...
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=webhook
+        asset_path: ./webhook/webhook
+        asset_name: webhook
+        asset_content_type: application/octet-stream
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

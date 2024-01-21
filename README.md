@@ -31,7 +31,7 @@ Ensure that the `config.json` file is located in the same directory as the binar
 
 1. **Download and Run the Binary**:
    ```bash
-   curl -LO https://github.com/Transfa/sendhooks-engine/releases/latest
+   curl -LO https://github.com/Transfa/sendhooks-engine/releases/latest/download/webhook
    chmod +x webhook
    ./webhook
    ```

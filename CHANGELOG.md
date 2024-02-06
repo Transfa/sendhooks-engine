@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Fixed
+
+
+## [0.3.0-beta] - 2024-02-06
+
+### Added
+
 - Remove the sendhooks image from the API (#58) [migrate to https://github.com/Transfa/sendhooks-monitoring]
 - Persisting data about the webhooks (#42)
 - Integration of Logrus for Improved Logging (#55)
 - Send response details in case of webhook failed (#39)
-
-### Fixed
 
 ## [0.2.0-beta] - 2023-11-23
 

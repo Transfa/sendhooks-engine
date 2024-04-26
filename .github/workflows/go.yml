@@ -22,7 +22,7 @@ jobs:
         go-version: '1.20'
 
     - name: Build
-      run: cd webhook && go build -o webhook .
+      run: cd sendhooks && go build -o sendhooks .
 
     - name: Test
-      run: cd webhook && go test -v ./...
+      run: cd sendhooks && go test -v ./...

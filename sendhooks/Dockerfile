@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -o webhook .
+RUN CGO_ENABLED=0 GOOS=linux go build -o sendhooks .
 
 #### Start a new stage from scratch ####
 FROM alpine:latest  
@@ -19,7 +19,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/webhook .
+COPY --from=builder /app/sendhooks .
 
 # Command to run the executable
-CMD ["./webhook"]
+CMD ["./sendhooks"]

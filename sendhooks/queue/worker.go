@@ -8,13 +8,13 @@ we also handle the retries and the exponential backoff logic for sending the hoo
 import (
 	"context"
 	"fmt"
+	"sendhooks/logging"
+	"sendhooks/sender"
 	"time"
-	"webhook/logging"
-	"webhook/sender"
 
 	"github.com/go-redis/redis/v8"
 
-	redisClient "webhook/redis"
+	redisClient "sendhooks/redis"
 )
 
 const (
@@ -35,7 +35,7 @@ func ProcessWebhooks(ctx context.Context, webhookQueue chan redisClient.WebhookP
 
 func sendWebhookWithRetries(ctx context.Context, payload redisClient.WebhookPayload, client *redis.Client, configuration redisClient.Configuration) {
 	if err, created := retryWithExponentialBackoff(ctx, payload, client, configuration); err != nil {
-		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send webhook after maximum retries. WebhookID : %s", payload.WebhookID))
+		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send sendhooks after maximum retries. WebhookID : %s", payload.WebhookID))
 		err := redisClient.PublishStatus(ctx, payload.WebhookID, payload.URL, created, "", "failed", err.Error(), client, configuration)
 		if err != nil {
 			logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update: WebhookID : %s ", payload.WebhookID))
@@ -74,7 +74,7 @@ func retryWithExponentialBackoff(context context.Context, payload redisClient.We
 			break
 		}
 
-		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error sending webhook: %s", err))
+		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error sending sendhooks: %s", err))
 
 		backoffTime = calculateBackoff(backoffTime)
 		retries++

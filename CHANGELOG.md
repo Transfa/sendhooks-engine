@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+- Rename webhook directory and binary to sendhooks (#62)
+
 ### Added
 
 ### Fixed

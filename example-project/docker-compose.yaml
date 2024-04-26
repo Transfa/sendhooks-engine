@@ -8,7 +8,7 @@ services:
       - "6379:6379" # this makes the service available on the localhost via 6379.
 
   webhook-sender:
-    build: ../webhook
+    build: ../sendhooks
     depends_on:
       - redis
     volumes:

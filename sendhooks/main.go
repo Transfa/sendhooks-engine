@@ -10,16 +10,16 @@ import (
 	"strconv"
 	"strings"
 
-	"webhook/logging"
-	"webhook/queue"
+	"sendhooks/logging"
+	"sendhooks/queue"
 
-	redisClient "webhook/redis"
-	redis_tls_config "webhook/utils"
+	redisClient "sendhooks/redis"
+	redistlsconfig "sendhooks/utils"
 
 	"github.com/go-redis/redis/v8"
 )
 
-// Declare a variable 'config' of type 'redisClient.Configuration'.
+// Config Declare a variable 'config' of type 'redisClient.Configuration'.
 var Config redisClient.Configuration
 
 // LoadConfiguration is a function that takes a filename as a string and returns an error.
@@ -64,7 +64,7 @@ func main() {
 	defer cancel()
 	err = logging.WebhookLogger(logging.EventType, "starting sendhooks engine")
 	if err != nil {
-		log.Fatalf("Failed to log webhook event: %v", err)
+		log.Fatalf("Failed to log sendhooks event: %v", err)
 	}
 
 	client, err := createRedisClient()
@@ -114,7 +114,7 @@ func createRedisClient() (*redis.Client, error) {
 		clientKeyPath := Config.RedisClientKey
 
 		var err error
-		tlsConfig, err = redis_tls_config.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)
+		tlsConfig, err = redistlsconfig.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)
 		if err != nil {
 			return nil, err
 		}

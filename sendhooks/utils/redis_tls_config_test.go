@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"os"
+	certificates "sendhooks/utils/tests"
 	"testing"
-	certificates "webhook/utils/tests"
 )
 
 func FormatErrorBody(errorType string) string {

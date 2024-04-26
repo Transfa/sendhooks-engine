@@ -1,4 +1,4 @@
-module webhook
+module sendhooks
 
 go 1.20
 

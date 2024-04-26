@@ -14,7 +14,7 @@ import (
 	"sendhooks/queue"
 
 	redisClient "sendhooks/redis"
-	redis_tls_config "sendhooks/utils"
+	redistlsconfig "sendhooks/utils"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -114,7 +114,7 @@ func createRedisClient() (*redis.Client, error) {
 		clientKeyPath := Config.RedisClientKey
 
 		var err error
-		tlsConfig, err = redis_tls_config.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)
+		tlsConfig, err = redistlsconfig.CreateTLSConfig(caCertPath, clientCertPath, clientKeyPath)
 		if err != nil {
 			return nil, err
 		}

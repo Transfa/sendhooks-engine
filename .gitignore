@@ -24,7 +24,7 @@ Godeps/
 .fleet/
 
 #  binary files
-webhook/webhook
+sendhooks/webhook
 
 # sendhooks api
 node_modules/

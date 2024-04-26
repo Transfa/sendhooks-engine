@@ -3,7 +3,7 @@ package redis
 /*
 This redis package provides utilities for subscribing and processing messages from a Redis stream.
 
-It defines the structure for webhook payloads, offers mechanisms for subscribing to a Redis stream,
+It defines the structure for sendhooks payloads, offers mechanisms for subscribing to a Redis stream,
 and handles message processing.
 
 - Graceful shutdowns and context propagation: Ensures the infinite message listening loop can be halted
@@ -19,8 +19,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sendhooks/logging"
 	"time"
-	"webhook/logging"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -32,6 +32,7 @@ type WebhookPayload struct {
 	MessageID  string                 `json:"messageId"`
 	Data       map[string]interface{} `json:"data"`
 	SecretHash string                 `json:"secretHash"`
+	MetaData   map[string]interface{} `json:"metaData"`
 }
 
 // Configuration is a struct that holds various settings for a Redis client connection.
@@ -48,7 +49,7 @@ type Configuration struct {
 	SecretHashHeaderName  string `json:"secretHashHeaderName"`
 }
 
-// WebhookDeliveryStatus represents the delivery status of a webhook.
+// WebhookDeliveryStatus represents the delivery status of a sendhooks.
 type WebhookDeliveryStatus struct {
 	WebhookID     string `json:"webhook_id"`
 	Status        string `json:"status"`
@@ -98,7 +99,7 @@ func processStreamMessages(ctx context.Context, client *redis.Client, streamName
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped webhook due to channel Golang overflow. Webhook ID: %s", payload.WebhookID))
+			logging.WebhookLogger(logging.WarningType, fmt.Errorf("dropped sendhooks due to channel Golang overflow. Webhook ID: %s", payload.WebhookID))
 		}
 	}
 
@@ -172,7 +173,7 @@ func getRedisStreamStatusName(configuration Configuration) string {
 
 	streamStatusName := configuration.RedisStreamStatusName
 	if streamStatusName == "" {
-		streamStatusName = "webhook-status-updates"
+		streamStatusName = "sendhooks-status-updates"
 	}
 	return streamStatusName
 }
@@ -208,7 +209,7 @@ func (wds WebhookDeliveryStatus) toMap() (map[string]interface{}, error) {
 	return msgMap, nil
 }
 
-// PublishStatus publishes webhook status updates to the Redis stream.
+// PublishStatus publishes sendhooks status updates to the Redis stream.
 func PublishStatus(ctx context.Context, webhookID, url string, created string, delivered string, status, deliveryError string, client *redis.Client, config Configuration) error {
 	message := WebhookDeliveryStatus{
 		WebhookID:     webhookID,

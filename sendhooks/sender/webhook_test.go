@@ -3,9 +3,9 @@ package sender
 import (
 	"errors"
 	"net/http"
+	"sendhooks/logging"
+	"sendhooks/redis"
 	"testing"
-	"webhook/logging"
-	"webhook/redis"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +24,7 @@ func TestSendWebhook(t *testing.T) {
 		return nil
 	}
 
-	t.Run("Successful webhook sending", func(t *testing.T) {
+	t.Run("Successful sendhooks sending", func(t *testing.T) {
 		resetMocks() // Reset all mocks to original functions
 
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
@@ -32,7 +32,7 @@ func TestSendWebhook(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("Failed webhook due to marshaling errors", func(t *testing.T) {
+	t.Run("Failed sendhooks due to marshaling errors", func(t *testing.T) {
 		resetMocks()
 		marshalJSON = func(data interface{}) ([]byte, error) {
 			return nil, errors.New("marshaling error")
@@ -43,7 +43,7 @@ func TestSendWebhook(t *testing.T) {
 		assert.EqualError(t, err, "marshaling error")
 	})
 
-	t.Run("Failed webhook due to request preparation errors", func(t *testing.T) {
+	t.Run("Failed sendhooks due to request preparation errors", func(t *testing.T) {
 		resetMocks()
 		prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration redis.Configuration) (*http.Request, error) {
 			return nil, errors.New("request preparation error")
@@ -54,7 +54,7 @@ func TestSendWebhook(t *testing.T) {
 		assert.EqualError(t, err, "request preparation error")
 	})
 
-	t.Run("Failed webhook due to response processing errors", func(t *testing.T) {
+	t.Run("Failed sendhooks due to response processing errors", func(t *testing.T) {
 		resetMocks()
 		processResponse = func(resp *http.Response) (string, []byte, error) {
 			return "failed", nil, errors.New("response processing error")
@@ -65,7 +65,7 @@ func TestSendWebhook(t *testing.T) {
 		assert.EqualError(t, err, "response processing error")
 	})
 
-	t.Run("Logging on failed webhook delivery", func(t *testing.T) {
+	t.Run("Logging on failed sendhooks delivery", func(t *testing.T) {
 		resetMocks()
 		processResponse = func(resp *http.Response) (string, []byte, error) {
 			return "failed", []byte("error body"), nil

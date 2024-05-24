@@ -4,11 +4,15 @@ services:
   redis:
     image: redis:latest
     hostname: redis
+    networks:
+      - sendhooks
     ports:
-      - "6379:6379" # this makes the service available on the localhost via 6379.
+      - "6379:6379" # Exposes Redis on localhost via port 6379
 
   webhook-sender:
     build: ../sendhooks
+    networks:
+      - sendhooks
     depends_on:
       - redis
     volumes:
@@ -16,7 +20,13 @@ services:
 
   flask-api:
     build: ./api/
+    networks:
+      - sendhooks
     ports:
-      - "5001:5000" # the default port for accessing from the localhost is 5001. The service inside docker can be accessed from the port 5000.
+      - "5001:5000" # Exposes Flask API on localhost via port 5001, internal port 5000
     depends_on:
       - webhook-sender
+
+networks:
+  sendhooks:
+    driver: bridge

@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+## [0.3.1-beta] - 2024-05-24
+
+- Convert WebhookDeliveryStatus to JSON String for Redis Stream (#65)
+- Rename webhook directory and binary to sendhooks (#62)
+
+### Added
+
+### Fixed
+
 
 ## [0.3.0-beta] - 2024-02-06
 

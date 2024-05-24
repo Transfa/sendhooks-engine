@@ -179,34 +179,24 @@ func getRedisStreamStatusName(configuration Configuration) string {
 }
 
 // addMessageToStream adds a message to a Redis stream.
-func addMessageToStream(ctx context.Context, client *redis.Client, streamName string, message WebhookDeliveryStatus) error {
-	msgMap, err := message.toMap()
-	if err != nil {
-		return fmt.Errorf("converting message to map: %w", err)
-	}
-
-	_, err = client.XAdd(ctx, &redis.XAddArgs{
+func addMessageToStream(ctx context.Context, client *redis.Client, streamName string, jsonString string) error {
+	_, err := client.XAdd(ctx, &redis.XAddArgs{
 		Stream: streamName,
-		Values: msgMap,
+		Values: map[string]interface{}{"data": jsonString},
 	}).Result()
 
 	return err
 }
 
 // toMap converts WebhookDeliveryStatus to a map for Redis XAdd.
-func (wds WebhookDeliveryStatus) toMap() (map[string]interface{}, error) {
+// toJSONString converts WebhookDeliveryStatus to a JSON string for Redis XAdd.
+func (wds WebhookDeliveryStatus) toJSONString() (string, error) {
 	data, err := json.Marshal(wds)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	var msgMap map[string]interface{}
-	err = json.Unmarshal(data, &msgMap)
-	if err != nil {
-		return nil, err
-	}
-
-	return msgMap, nil
+	return string(data), nil
 }
 
 // PublishStatus publishes sendhooks status updates to the Redis stream.
@@ -220,6 +210,11 @@ func PublishStatus(ctx context.Context, webhookID, url string, created string, d
 		Delivered:     delivered,
 	}
 
+	jsonString, err := message.toJSONString()
+	if err != nil {
+		return err
+	}
+
 	streamName := getRedisStreamStatusName(config)
-	return addMessageToStream(ctx, client, streamName, message)
+	return addMessageToStream(ctx, client, streamName, jsonString)
 }

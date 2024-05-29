@@ -71,12 +71,11 @@ func TestSendWebhook(t *testing.T) {
 			return "failed", []byte("error body"), nil
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
+		SendWebhook(nil, "http://dummy\t\tassert.EqualError(t, err, \"failed\")\n.com", "webhookId", "secretHash", redis.Configuration{})
 		if !webhookLoggerInvoked {
 			assert.Fail(t, "Expected WebhookLogger to be invoked")
 		}
 
-		assert.EqualError(t, err, "failed")
 	})
 }
 

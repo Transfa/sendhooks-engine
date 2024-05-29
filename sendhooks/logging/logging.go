@@ -3,6 +3,7 @@ package logging
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -14,8 +15,31 @@ const (
 	EventType   = "EVENT"
 )
 
-// Create a new Logrus Logger
-var logger = logrus.New()
+// Logger setup
+var (
+	logger      = logrus.New()
+	logFile     *os.File
+	logFileName string
+	logMutex    sync.Mutex
+)
+
+func init() {
+	setupLogFile()
+	go rotateLogFileDaily()
+}
+
+// setupLogFile initializes the log file.
+func setupLogFile() {
+	var err error
+	logFileName = currentDate() + ".log"
+	logFile, err = os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("Failed to open log file: %v\n", err)
+		return
+	}
+	logger.SetOutput(logFile)
+	logger.SetFormatter(&logrus.TextFormatter{})
+}
 
 // currentDate retrieves the current date in "YYYY-MM-DD" format.
 func currentDate() string {
@@ -27,6 +51,20 @@ func currentDateTime() string {
 	return time.Now().Format("2006-01-02 15:04:05")
 }
 
+// rotateLogFileDaily handles daily log rotation.
+func rotateLogFileDaily() {
+	for {
+		time.Sleep(24 * time.Hour)
+		logMutex.Lock()
+		if currentDate() != logFileName[:10] {
+			logFile.Close()
+			setupLogFile()
+		}
+		logMutex.Unlock()
+	}
+}
+
+// WebhookLogger logs messages with different types (Error, Warning, Event).
 var WebhookLogger = func(errorType string, message interface{}) error {
 	var messageString string
 
@@ -39,38 +77,20 @@ var WebhookLogger = func(errorType string, message interface{}) error {
 		return fmt.Errorf("unsupported message type: %T", message)
 	}
 
-	logFileDate := currentDate()
-	logFileName := fmt.Sprintf("%s.log", logFileDate)
-
-	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Print("Failed to open log file: \n", err)
-		return err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Print("Failed to close log file: \n", err)
-		}
-	}(file)
-
-	logger.SetOutput(file)
-	logger.SetFormatter(&logrus.TextFormatter{})
+	logMutex.Lock()
+	defer logMutex.Unlock()
 
 	// Log the entry
+	entry := logger.WithFields(logrus.Fields{
+		"date": currentDateTime(),
+	})
 	switch errorType {
 	case ErrorType:
-		logger.WithFields(logrus.Fields{
-			"date": currentDateTime(),
-		}).Error(messageString)
+		entry.Error(messageString)
 	case WarningType:
-		logger.WithFields(logrus.Fields{
-			"date": currentDateTime(),
-		}).Warning(messageString)
+		entry.Warning(messageString)
 	case EventType:
-		logger.WithFields(logrus.Fields{
-			"date": currentDateTime(),
-		}).Info(messageString)
+		entry.Info(messageString)
 	}
 
 	return nil

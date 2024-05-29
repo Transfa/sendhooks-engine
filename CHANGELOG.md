@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased] - yyyy-mm-dd
 
 - Fix Delivery Error message (#68)
+- Race condition on log file writing (#67)
 
 ### Added
 

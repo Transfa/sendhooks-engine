@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased] - yyyy-mm-dd
 
 - Wrong status sent in case of errors (#71)
+- Configure Automatic Push to Docker Registry using GitHub Actions (#49)
 
 ### Added
 

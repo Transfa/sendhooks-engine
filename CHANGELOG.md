@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-## [0.3.3-beta] - 2024-06-01
+## [v0.3.3-beta] - 2024-06-01
 
 - Wrong status sent in case of errors (#71)
 - Configure Automatic Push to Docker Registry using GitHub Actions (#49)

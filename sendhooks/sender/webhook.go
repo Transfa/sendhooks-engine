@@ -27,12 +27,12 @@ func SendWebhook(data interface{}, url string, webhookId string, secretHash stri
 
 	defer closeResponse(resp.Body)
 
-	status, respBody, err := processResponse(resp)
+	status, respBody, statusCode, err := processResponse(resp)
 	if err != nil {
 		return err
 	}
 
-	message := fmt.Sprintf("webhook sending failed with status: %s, response body: %s", status, string(respBody))
+	message := fmt.Sprintf("webhook sending failed with status: %d, response body: %s", statusCode, string(respBody))
 
 	if status == "failed" {
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf(message))

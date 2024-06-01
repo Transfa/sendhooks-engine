@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+- Wrong status sent in case of errors (#71)
+
 ### Added
 
 ### Fixed

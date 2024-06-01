@@ -56,8 +56,8 @@ func TestSendWebhook(t *testing.T) {
 
 	t.Run("Failed sendhooks due to response processing errors", func(t *testing.T) {
 		resetMocks()
-		processResponse = func(resp *http.Response) (string, []byte, error) {
-			return "failed", nil, errors.New("response processing error")
+		processResponse = func(resp *http.Response) (string, []byte, int, error) {
+			return "failed", nil, 0, errors.New("response processing error")
 		}
 
 		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
@@ -67,8 +67,8 @@ func TestSendWebhook(t *testing.T) {
 
 	t.Run("Logging on failed sendhooks delivery", func(t *testing.T) {
 		resetMocks()
-		processResponse = func(resp *http.Response) (string, []byte, error) {
-			return "failed", []byte("error body"), nil
+		processResponse = func(resp *http.Response) (string, []byte, int, error) {
+			return "failed", []byte("error body"), 0, nil
 		}
 
 		SendWebhook(nil, "http://dummy\t\tassert.EqualError(t, err, \"failed\")\n.com", "webhookId", "secretHash", redis.Configuration{})

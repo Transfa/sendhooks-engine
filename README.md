@@ -1,4 +1,9 @@
 # SendHooks Engine
+![GitHub Tag](https://img.shields.io/github/v/tag/transfa/sendhooks-engine)
+[![Build and Release](https://github.com/Transfa/sendhooks-engine/actions/workflows/release.yml/badge.svg)](https://github.com/Transfa/sendhooks-engine/actions/workflows/release.yml)
+[![Go](https://github.com/Transfa/sendhooks-engine/actions/workflows/go.yml/badge.svg)](https://github.com/Transfa/sendhooks-engine/actions/workflows/go.yml)
+[![CodeQL](https://github.com/Transfa/sendhooks-engine/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Transfa/sendhooks-engine/actions/workflows/github-code-scanning/codeql)
+
 > ⚠️ **Warning**: This project is not stable yet. Feel free to join the Discord so we can build together [https://discord.gg/w2fBSz3j](https://discord.gg/2mHxEgxm5r)
 
 ## Introduction

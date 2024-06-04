@@ -55,7 +55,7 @@ Ensure that the `config.json` file is located in the same directory as the binar
 - Includes a secret hash in HTTP headers for message authenticity verification.
 
 ## Contributors
-We welcome contributions from the community. If you'd like to contribute, please check out our [list of issues](https://github.com/koladev32/sendhooks-engine/issues) to see how you can help.
+We welcome contributions from the community. If you'd like to contribute, please check out our [list of issues](https://github.com/Transfa/sendhooks-engine/issues) to see how you can help.
 
 You can find how to contribute in the [CONTRIBUTING](CONTRIBUTING.md) file.
 

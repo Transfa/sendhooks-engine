@@ -20,7 +20,7 @@ This guide outlines the process for contributing to SendHooks Engine. We encoura
 Before you start contributing, make sure you have set up your development environment:
 
 ```bash
-git clone https://github.com/koladev32/sendhooks-engine.git && cd sendhooks-engine
+git clone https://github.com/Transfa/sendhooks-engine.git && cd sendhooks-engine/sendhooks
 
 go mod download
 ```
@@ -41,7 +41,7 @@ If you want to contribute code changes or bug fixes, please follow these steps:
 
 If you find a bug or want to propose a new feature, please:
 
-1. Check if the issue already exists in our [issue tracker](https://github.com/koladev32/sendhooks-engine/issues).
+1. Check if the issue already exists in our [issue tracker](https://github.com/Transfa/sendhooks-engine/issues).
 2. If not, create a new issue and provide detailed information.
 
 ## Docker
@@ -72,7 +72,7 @@ go test -v ./...
 
 ## Project-Specific Guidelines and Expectations
 
-For any project-specific guidelines or expectations, please refer to our [README](https://github.com/koladev32/sendhooks-engine/blob/main/README.md).
+For any project-specific guidelines or expectations, please refer to our [README](README.md).
 
 We appreciate your contributions and look forward to working with you to improve SendHooks Engine!
 

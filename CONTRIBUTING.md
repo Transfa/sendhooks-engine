@@ -20,7 +20,7 @@ This guide outlines the process for contributing to SendHooks Engine. We encoura
 Before you start contributing, make sure you have set up your development environment:
 
 ```bash
-git clone https://github.com/koladev32/sendhooks-engine.git && cd sendhooks-engine
+git clone https://github.com/Transfa/sendhooks-engine.git && cd sendhooks-engine
 
 go mod download
 ```

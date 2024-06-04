@@ -6,7 +6,7 @@ At Sendhooks, we take security seriously and welcome the responsible disclosure 
 
 To report a security vulnerability, please follow these steps:
 
-1. Send an email to [koladev32@gmail.com](mailto:koladev32@gmail.com) with the subject line: **[Sendhooks Security Vulnerability]**.
+1. Send an email to [kolawole.mangabo@transfapp.com](mailto:kolawole.mangabo@transfapp.com) with the subject line: **[Sendhooks Security Vulnerability]**.
 
 2. Provide a detailed description of the vulnerability, including:
     - A clear and concise summary of the issue.
@@ -34,4 +34,4 @@ Thank you for helping us keep Sendhooks secure. Your efforts in reporting securi
 
 This security policy is subject to updates and changes. We encourage you to check this document periodically for any updates.
 
-Last Updated: 17/09/2023
+Last Updated: 04/06/2024

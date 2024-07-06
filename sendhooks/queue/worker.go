@@ -9,12 +9,9 @@ import (
 	"context"
 	"fmt"
 	"sendhooks/adapter"
-	"sendhooks/adapter/adapter_manager"
 	"sendhooks/logging"
 	"sendhooks/sender"
 	"time"
-
-	redisadapter "sendhooks/adapter/redis_adapter"
 )
 
 const (
@@ -26,22 +23,16 @@ const (
 	maxBackoff     time.Duration = time.Hour
 )
 
-func ProcessWebhooks(ctx context.Context, webhookQueue chan adapter.WebhookPayload, configuration adapter.Configuration) {
+func ProcessWebhooks(ctx context.Context, webhookQueue chan adapter.WebhookPayload, configuration adapter.Configuration, queueAdapter adapter.Adapter) {
 
 	for payload := range webhookQueue {
-		go sendWebhookWithRetries(ctx, payload, configuration)
+		go sendWebhookWithRetries(ctx, payload, configuration, queueAdapter)
 	}
 }
 
-func sendWebhookWithRetries(ctx context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration) {
-	conf := adapter_manager.GetConfig()
+func sendWebhookWithRetries(ctx context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration, queueAdapter adapter.Adapter) {
 
-	var queueAdapter adapter.Adapter
-
-	if conf.Broker == "redis" {
-		queueAdapter = redisadapter.NewRedisAdapter(conf)
-	}
-	if err, created := retryWithExponentialBackoff(ctx, payload, configuration); err != nil {
+	if err, created := retryWithExponentialBackoff(ctx, payload, configuration, queueAdapter); err != nil {
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send sendhooks after maximum retries. WebhookID : %s", payload.WebhookID))
 		err := queueAdapter.PublishStatus(ctx, payload.WebhookID, payload.URL, created, "", "failed", err.Error())
 		if err != nil {
@@ -61,7 +52,7 @@ func calculateBackoff(currentBackoff time.Duration) time.Duration {
 	return nextBackoff
 }
 
-func retryWithExponentialBackoff(context context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration) (error, string) {
+func retryWithExponentialBackoff(context context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration, queueAdapter adapter.Adapter) (error, string) {
 	retries := 0
 	backoffTime := initialBackoff
 	var requestError error
@@ -96,14 +87,6 @@ func retryWithExponentialBackoff(context context.Context, payload adapter.Webhoo
 	}
 
 	delivered := time.Now().String()
-
-	conf := adapter_manager.GetConfig()
-
-	var queueAdapter adapter.Adapter
-
-	if conf.Broker == "redis" {
-		queueAdapter = redisadapter.NewRedisAdapter(conf)
-	}
 
 	err := queueAdapter.PublishStatus(context, payload.WebhookID, payload.URL, created, delivered, "success", "")
 	if err != nil {

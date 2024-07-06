@@ -14,6 +14,15 @@ type WebhookPayload struct {
 	MetaData   map[string]interface{} `json:"metaData"`
 }
 
+type WebhookDeliveryStatus struct {
+	WebhookID     string `json:"webhook_id"`
+	Status        string `json:"status"`
+	DeliveryError string `json:"delivery_error"`
+	URL           string `json:"url"`
+	Created       string `json:"created"`
+	Delivered     string `json:"delivered"`
+}
+
 type RedisConfig struct {
 	RedisAddress          string `json:"redisAddress"`
 	RedisPassword         string `json:"redisPassword"`
@@ -36,6 +45,6 @@ type Configuration struct {
 type Adapter interface {
 	Connect() error
 	SubscribeToQueue(ctx context.Context, queue chan<- WebhookPayload) error
-	ProcessWebhooks(ctx context.Context, queue <-chan WebhookPayload) error
+	ProcessWebhooks(ctx context.Context, queue chan WebhookPayload, queueAdapter Adapter)
 	PublishStatus(ctx context.Context, webhookID, url, created, delivered, status, deliveryError string) error
 }

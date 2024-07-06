@@ -19,35 +19,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sendhooks/adapter"
 	"sendhooks/logging"
+
 	"time"
 
 	"github.com/go-redis/redis/v8"
 )
-
-// WebhookPayload represents the structure of the data from Redis.
-type WebhookPayload struct {
-	URL        string                 `json:"url"`
-	WebhookID  string                 `json:"webhookId"`
-	MessageID  string                 `json:"messageId"`
-	Data       map[string]interface{} `json:"data"`
-	SecretHash string                 `json:"secretHash"`
-	MetaData   map[string]interface{} `json:"metaData"`
-}
-
-// Configuration is a struct that holds various settings for a Redis client connection.
-type Configuration struct {
-	RedisAddress          string `json:"redisAddress"`
-	RedisPassword         string `json:"redisPassword"`
-	RedisDb               string `json:"redisDb"`
-	RedisSsl              string `json:"redisSsl"`
-	RedisCaCert           string `json:"redisCaCert"`
-	RedisClientCert       string `json:"redisClientCert"`
-	RedisClientKey        string `json:"redisClientKey"`
-	RedisStreamName       string `json:"redisStreamName"`
-	RedisStreamStatusName string `json:"redisStreamStatusName"`
-	SecretHashHeaderName  string `json:"secretHashHeaderName"`
-}
 
 // WebhookDeliveryStatus represents the delivery status of a sendhooks.
 type WebhookDeliveryStatus struct {
@@ -62,7 +40,7 @@ type WebhookDeliveryStatus struct {
 var lastID = "0" // Start reading from the beginning of the stream
 
 // SubscribeToStream initializes a subscription to a Redis stream and continuously listens for messages.
-func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- WebhookPayload, config Configuration, startedChan ...chan bool) error {
+func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue chan<- adapter.WebhookPayload, config adapter.Configuration, startedChan ...chan bool) error {
 	streamName := getRedisStreamName(config)
 
 	for {
@@ -82,7 +60,7 @@ func SubscribeToStream(ctx context.Context, client *redis.Client, webhookQueue c
 }
 
 // processStreamMessages retrieves, decodes, and dispatches messages from the Redis stream.
-func processStreamMessages(ctx context.Context, client *redis.Client, streamName string, webhookQueue chan<- WebhookPayload) error {
+func processStreamMessages(ctx context.Context, client *redis.Client, streamName string, webhookQueue chan<- adapter.WebhookPayload) error {
 	messages, err := readMessagesFromStream(ctx, client, streamName)
 
 	if err != nil {
@@ -107,7 +85,7 @@ func processStreamMessages(ctx context.Context, client *redis.Client, streamName
 }
 
 // readMessagesFromStream reads messages from a Redis stream and returns them.
-func readMessagesFromStream(ctx context.Context, client *redis.Client, streamName string) ([]WebhookPayload, error) {
+func readMessagesFromStream(ctx context.Context, client *redis.Client, streamName string) ([]adapter.WebhookPayload, error) {
 
 	entries, err := client.XRead(ctx, &redis.XReadArgs{
 		Streams: []string{streamName, lastID},
@@ -124,9 +102,9 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 		return nil, err
 	}
 
-	var messages []WebhookPayload
+	var messages []adapter.WebhookPayload
 	for _, entry := range entries[0].Messages {
-		var payload WebhookPayload
+		var payload adapter.WebhookPayload
 
 		// Safely assert types and handle potential errors
 		if data, ok := entry.Values["data"].(string); ok {
@@ -159,9 +137,9 @@ func readMessagesFromStream(ctx context.Context, client *redis.Client, streamNam
 }
 
 // getRedisStreamName fetches the Redis stream name from an environment variable.
-func getRedisStreamName(configuration Configuration) string {
+func getRedisStreamName(configuration adapter.Configuration) string {
 
-	streamName := configuration.RedisStreamName
+	streamName := configuration.Redis.RedisStreamName
 	if streamName == "" {
 		streamName = "hooks"
 	}
@@ -169,9 +147,9 @@ func getRedisStreamName(configuration Configuration) string {
 }
 
 // getRedisStreamStatusName fetches the Redis stream name from an environment variable.
-func getRedisStreamStatusName(configuration Configuration) string {
+func getRedisStreamStatusName(configuration adapter.Configuration) string {
 
-	streamStatusName := configuration.RedisStreamStatusName
+	streamStatusName := configuration.Redis.RedisStreamStatusName
 	if streamStatusName == "" {
 		streamStatusName = "sendhooks-status-updates"
 	}
@@ -200,7 +178,7 @@ func (wds WebhookDeliveryStatus) toJSONString() (string, error) {
 }
 
 // PublishStatus publishes sendhooks status updates to the Redis stream.
-func PublishStatus(ctx context.Context, webhookID, url string, created string, delivered string, status, deliveryError string, client *redis.Client, config Configuration) error {
+func PublishStatus(ctx context.Context, webhookID, url string, created string, delivered string, status, deliveryError string, client *redis.Client, config adapter.Configuration) error {
 	message := WebhookDeliveryStatus{
 		WebhookID:     webhookID,
 		Status:        status,

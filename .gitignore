@@ -24,7 +24,7 @@ Godeps/
 .fleet/
 
 #  binary files
-sendhooks/webhook
+webhook
 
 # sendhooks api
 node_modules/
@@ -36,3 +36,8 @@ config.json
 
 #sendhooks-engine-api
 api/.env
+
+.DS_Store
+
+sendhooks
+sendhooks/config.json

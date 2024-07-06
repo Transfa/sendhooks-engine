@@ -15,11 +15,13 @@ type WebhookPayload struct {
 }
 
 type WebhookDeliveryStatus struct {
-	WebhookID     string `json:"webhook_id"`
+	WebhookID     string `json:"webhookId"`
 	Status        string `json:"status"`
-	DeliveryError string `json:"delivery_error"`
+	DeliveryError string `json:"deliveryError"`
 	URL           string `json:"url"`
 	Created       string `json:"created"`
+	PayloadSize   int    `json:"payloadSize"`
+	NumberOfTries int    `json:"numberOfTries"`
 	Delivered     string `json:"delivered"`
 }
 
@@ -46,5 +48,5 @@ type Adapter interface {
 	Connect() error
 	SubscribeToQueue(ctx context.Context, queue chan<- WebhookPayload) error
 	ProcessWebhooks(ctx context.Context, queue chan WebhookPayload, queueAdapter Adapter)
-	PublishStatus(ctx context.Context, webhookID, url, created, delivered, status, deliveryError string) error
+	PublishStatus(ctx context.Context, webhookID, url, created, delivered, status, deliveryError string, payloadSize int, numberOfTries int) error
 }

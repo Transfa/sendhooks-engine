@@ -161,7 +161,7 @@ func (r *RedisAdapter) ProcessWebhooks(ctx context.Context, queue chan adapter.W
 }
 
 // PublishStatus publishes the status of a webhook delivery.
-func (r *RedisAdapter) PublishStatus(ctx context.Context, webhookID, url, created, delivered, status, deliveryError string) error {
+func (r *RedisAdapter) PublishStatus(ctx context.Context, webhookID, url, created, delivered, status, deliveryError string, payloadSize int, numberOfTries int) error {
 	message := adapter.WebhookDeliveryStatus{
 		WebhookID:     webhookID,
 		Status:        status,
@@ -169,6 +169,8 @@ func (r *RedisAdapter) PublishStatus(ctx context.Context, webhookID, url, create
 		URL:           url,
 		Created:       created,
 		Delivered:     delivered,
+		PayloadSize:   payloadSize,
+		NumberOfTries: numberOfTries,
 	}
 
 	jsonString, err := json.Marshal(message)

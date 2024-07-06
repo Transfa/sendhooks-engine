@@ -12,7 +12,35 @@ import (
 	"sendhooks/logging"
 	"sendhooks/sender"
 	"time"
+	"unsafe"
 )
+
+// Function to measure the size of a map in bytes
+func SizeofMap(m map[string]interface{}) int {
+	size := int(unsafe.Sizeof(m))
+	for k, v := range m {
+		size += int(unsafe.Sizeof(k)) + len(k)
+		size += SizeofValue(v)
+	}
+	return size
+}
+
+// Function to measure the size of a value in bytes
+func SizeofValue(v interface{}) int {
+	switch v := v.(type) {
+	case int:
+		return int(unsafe.Sizeof(v))
+	case float64:
+		return int(unsafe.Sizeof(v))
+	case string:
+		return int(unsafe.Sizeof(v)) + len(v)
+	case []int:
+		return int(unsafe.Sizeof(v)) + len(v)*int(unsafe.Sizeof(v[0]))
+	// Add more cases as needed for other types
+	default:
+		return 0 // Unsupported type
+	}
+}
 
 const (
 	maxRetries int = 5
@@ -32,9 +60,9 @@ func ProcessWebhooks(ctx context.Context, webhookQueue chan adapter.WebhookPaylo
 
 func sendWebhookWithRetries(ctx context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration, queueAdapter adapter.Adapter) {
 
-	if err, created := retryWithExponentialBackoff(ctx, payload, configuration, queueAdapter); err != nil {
+	if err, created, retries := retryWithExponentialBackoff(ctx, payload, configuration, queueAdapter); err != nil {
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("failed to send sendhooks after maximum retries. WebhookID : %s", payload.WebhookID))
-		err := queueAdapter.PublishStatus(ctx, payload.WebhookID, payload.URL, created, "", "failed", err.Error())
+		err := queueAdapter.PublishStatus(ctx, payload.WebhookID, payload.URL, created, "", "failed", err.Error(), SizeofMap(payload.Data), retries)
 		if err != nil {
 			logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update: WebhookID : %s ", payload.WebhookID))
 		}
@@ -52,7 +80,7 @@ func calculateBackoff(currentBackoff time.Duration) time.Duration {
 	return nextBackoff
 }
 
-func retryWithExponentialBackoff(context context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration, queueAdapter adapter.Adapter) (error, string) {
+func retryWithExponentialBackoff(context context.Context, payload adapter.WebhookPayload, configuration adapter.Configuration, queueAdapter adapter.Adapter) (error, string, int) {
 	retries := 0
 	backoffTime := initialBackoff
 	var requestError error
@@ -83,15 +111,15 @@ func retryWithExponentialBackoff(context context.Context, payload adapter.Webhoo
 	logging.WebhookLogger(logging.WarningType, fmt.Errorf("maximum retries reached: %d", retries))
 
 	if requestError != nil {
-		return requestError, created
+		return requestError, created, retries
 	}
 
 	delivered := time.Now().String()
 
-	err := queueAdapter.PublishStatus(context, payload.WebhookID, payload.URL, created, delivered, "success", "")
+	err := queueAdapter.PublishStatus(context, payload.WebhookID, payload.URL, created, delivered, "success", "", SizeofMap(payload.Data), retries)
 	if err != nil {
 		logging.WebhookLogger(logging.WarningType, fmt.Errorf("error publishing status update: WebhookID : %s ", payload.WebhookID))
 	}
 
-	return nil, ""
+	return nil, "", retries
 }

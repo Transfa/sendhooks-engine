@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Create Adapter for Redis Integration [#76](https://github.com/Transfa/sendhooks-engine/issues/76)
+
 ### Fixed
 
 ## [v0.3.3-beta] - 2024-06-01

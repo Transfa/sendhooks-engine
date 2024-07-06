@@ -10,7 +10,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
-	"sendhooks/redis"
+	"sendhooks/adapter"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,7 +44,7 @@ func TestPrepareRequest(t *testing.T) {
 	jsonBytes := []byte(`{"key":"value"}`)
 	secretHash := "secret123"
 
-	req, err := prepareRequest(url, jsonBytes, secretHash, redis.Configuration{})
+	req, err := prepareRequest(url, jsonBytes, secretHash, adapter.Configuration{})
 
 	assert.NoError(t, err)
 

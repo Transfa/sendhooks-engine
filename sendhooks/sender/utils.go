@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sendhooks/adapter"
 	"sendhooks/logging"
-	redisClient "sendhooks/redis"
 )
 
 type HTTPDoer interface {
@@ -25,7 +25,7 @@ var marshalJSON = func(data interface{}) ([]byte, error) {
 	return jsonBytes, nil
 }
 
-var prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration redisClient.Configuration) (*http.Request, error) {
+var prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration adapter.Configuration) (*http.Request, error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		logging.WebhookLogger(logging.ErrorType, fmt.Errorf("error during the sendhooks request preparation"))

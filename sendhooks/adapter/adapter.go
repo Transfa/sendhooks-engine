@@ -41,6 +41,8 @@ type Configuration struct {
 	Redis                RedisConfig `json:"redis"`
 	SecretHashHeaderName string      `json:"secretHashHeaderName"`
 	Broker               string      `json:"broker"`
+	NumWorkers           int         `json:"numWorkers"`
+	ChannelSize          int         `json:"channelSize"`
 }
 
 // Adapter defines methods for interacting with different queue systems.

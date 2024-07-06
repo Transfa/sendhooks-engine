@@ -71,7 +71,7 @@ func (r *RedisAdapter) Connect() error {
 		Password:  redisPassword,
 		DB:        redisDBInt,
 		TLSConfig: tlsConfig,
-		PoolSize:  50,
+		PoolSize:  r.config.NumWorkers,
 	})
 
 	return nil

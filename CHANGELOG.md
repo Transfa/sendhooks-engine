@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Create Adapter for Redis Integration [#76](https://github.com/Transfa/sendhooks-engine/issues/76)
+- Add Data Size and Number of Tries to Payload Sent to Redis Status Stream [#75](https://github.com/Transfa/sendhooks-engine/issues/75)
 
 ### Fixed
 

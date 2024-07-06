@@ -3,8 +3,8 @@ package sender
 import (
 	"errors"
 	"net/http"
+	"sendhooks/adapter"
 	"sendhooks/logging"
-	"sendhooks/redis"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,7 +27,7 @@ func TestSendWebhook(t *testing.T) {
 	t.Run("Successful sendhooks sending", func(t *testing.T) {
 		resetMocks() // Reset all mocks to original functions
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", adapter.Configuration{})
 
 		assert.NoError(t, err)
 	})
@@ -38,18 +38,18 @@ func TestSendWebhook(t *testing.T) {
 			return nil, errors.New("marshaling error")
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", adapter.Configuration{})
 
 		assert.EqualError(t, err, "marshaling error")
 	})
 
 	t.Run("Failed sendhooks due to request preparation errors", func(t *testing.T) {
 		resetMocks()
-		prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration redis.Configuration) (*http.Request, error) {
+		prepareRequest = func(url string, jsonBytes []byte, secretHash string, configuration adapter.Configuration) (*http.Request, error) {
 			return nil, errors.New("request preparation error")
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", adapter.Configuration{})
 
 		assert.EqualError(t, err, "request preparation error")
 	})
@@ -60,7 +60,7 @@ func TestSendWebhook(t *testing.T) {
 			return "failed", nil, 0, errors.New("response processing error")
 		}
 
-		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", redis.Configuration{})
+		err := SendWebhook(nil, "http://dummy.com", "webhookId", "secretHash", adapter.Configuration{})
 
 		assert.EqualError(t, err, "response processing error")
 	})
@@ -71,7 +71,7 @@ func TestSendWebhook(t *testing.T) {
 			return "failed", []byte("error body"), 0, nil
 		}
 
-		SendWebhook(nil, "http://dummy\t\tassert.EqualError(t, err, \"failed\")\n.com", "webhookId", "secretHash", redis.Configuration{})
+		SendWebhook(nil, "http://dummy\t\tassert.EqualError(t, err, \"failed\")\n.com", "webhookId", "secretHash", adapter.Configuration{})
 		if !webhookLoggerInvoked {
 			assert.Fail(t, "Expected WebhookLogger to be invoked")
 		}

@@ -3,12 +3,12 @@ package sender
 import (
 	"errors"
 	"fmt"
+	"sendhooks/adapter"
 	"sendhooks/logging"
-	redisClient "sendhooks/redis"
 )
 
 // SendWebhook sends a JSON POST request to the specified URL
-func SendWebhook(data interface{}, url string, webhookId string, secretHash string, configuration redisClient.Configuration) error {
+func SendWebhook(data interface{}, url string, webhookId string, secretHash string, configuration adapter.Configuration) error {
 	jsonBytes, err := marshalJSON(data)
 	if err != nil {
 		return err

@@ -39,8 +39,8 @@ func main() {
 	}
 
 	// Define the size of the channel and the number of workers
-	webhookQueue := make(chan adapter.WebhookPayload, 1000)
-	numWorkers := 50
+	webhookQueue := make(chan adapter.WebhookPayload, conf.ChannelSize)
+	numWorkers := conf.NumWorkers
 
 	// Start the worker pool
 	var wg sync.WaitGroup

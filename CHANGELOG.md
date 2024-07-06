@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Create Adapter for Redis Integration [#76](https://github.com/Transfa/sendhooks-engine/issues/76)
 - Add Data Size and Number of Tries to Payload Sent to Redis Status Stream [#75](https://github.com/Transfa/sendhooks-engine/issues/75)
+- Add Configuration Parameters for Number of Workers and Channel Size [#79](https://github.com/Transfa/sendhooks-engine/issues/79)
 
 ### Fixed
 
